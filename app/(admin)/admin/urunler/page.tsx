@@ -967,7 +967,7 @@ export default function AdminCatalogPage() {
               </div>
 
               {prodImages.length > 0 && (
-                <div className="grid grid-cols-5 gap-2 pt-1">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1">
                   {prodImages.map((imgUrl, idx) => (
                     <div
                       key={`${imgUrl}-${idx}`}

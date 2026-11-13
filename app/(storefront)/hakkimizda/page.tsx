@@ -91,7 +91,7 @@ const framedCertificates = [
 export default function HakkimizdaPage() {
   return (
     <div
-      className="min-h-screen pt-28 pb-24 text-slate-900"
+      className="min-h-screen pt-20 sm:pt-28 pb-14 sm:pb-24 text-slate-900"
       style={{
         background:
           'linear-gradient(180deg, #e2eefc 0%, #f4f8fd 20%, #ffffff 45%, #eaf2fc 72%, #ffffff 100%)',

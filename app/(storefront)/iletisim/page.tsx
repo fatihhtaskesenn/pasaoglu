@@ -128,7 +128,7 @@ export default function IletisimPage() {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-24 bg-[#f8fafc] text-[#0f172a]">
+    <div className="min-h-screen pt-20 sm:pt-32 pb-14 sm:pb-24 bg-[#f8fafc] text-[#0f172a]">
       {/* ─── Corporate Header ───────────────────────────────── */}
       <section className="border-b border-slate-200 bg-white">
         <div className="max-w-screen-xl mx-auto px-6 py-16">
@@ -290,7 +290,7 @@ export default function IletisimPage() {
           {branches.map((b) => (
             <div
               key={b.id}
-              className="bg-white border border-slate-200 rounded-2xl p-8 flex flex-col justify-between space-y-6"
+              className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 flex flex-col justify-between space-y-5 sm:space-y-6"
             >
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-4">
@@ -341,7 +341,7 @@ export default function IletisimPage() {
                       Büyütmek için tıklayın
                     </span>
                   </div>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                     {b.photos.map((photo, photoIdx) => (
                       <button
                         key={photo.src}

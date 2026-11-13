@@ -356,10 +356,10 @@ function UrunlerContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 pt-28 pb-24">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 pt-20 sm:pt-28 pb-14 sm:pb-24">
       {/* ─── Üst Kurumsal Banner ─────────────────────────────── */}
       <section className="bg-gradient-to-r from-[#003e70] via-[#005596] to-[#004478] text-white border-b border-white/10">
-        <div className="max-w-screen-xl mx-auto px-6 py-10 sm:py-12">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.14em] uppercase text-sky-200 bg-white/10 px-3 py-1 rounded-full">
@@ -627,16 +627,16 @@ function UrunlerContent() {
 
         {/* ─── Ürün Grid ──────────────────────────────────────── */}
         {loadingProducts ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-96 rounded-2xl bg-white border border-slate-200 animate-pulse"
+                className="h-56 sm:h-96 rounded-xl sm:rounded-2xl bg-white border border-slate-200 animate-pulse"
               />
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

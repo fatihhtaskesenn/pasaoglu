@@ -165,34 +165,6 @@ export function HeroVideo() {
         <ChevronRight size={18} className="sm:w-[22px] sm:h-[22px]" />
       </button>
 
-      {/* ─── Alt İlerleme Çubukları (Fotoğraf Döngü Göstergesi) ─── */}
-      <div className="absolute bottom-3 sm:bottom-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 sm:gap-2.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-slate-950/35 backdrop-blur-md border border-white/15">
-        {slides.map((slide, idx) => {
-          const isActive = idx === currentIndex;
-          return (
-            <button
-              key={`${slide.src}-${idx}`}
-              type="button"
-              onClick={() => setCurrentIndex(idx)}
-              aria-label={`${idx + 1}. Ana Sayfa Görseli`}
-              className={`relative h-1.5 rounded-full overflow-hidden transition-all duration-300 cursor-pointer ${
-                isActive ? 'w-9 bg-white/30' : 'w-2.5 bg-white/45 hover:bg-white/75'
-              }`}
-            >
-              {isActive && (
-                <motion.span
-                  key={`progress-${currentIndex}`}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: SLIDE_DURATION_MS / 1000, ease: 'linear' }}
-                  className="absolute inset-y-0 left-0 bg-amber-400 rounded-full"
-                />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
       {/* ─── Alt Kısımda Sayfa Zeminine (#f8fafc) Yumuşak Geçiş ─── */}
       <div
         className="absolute inset-x-0 -bottom-px h-28 sm:h-36 z-20 pointer-events-none"

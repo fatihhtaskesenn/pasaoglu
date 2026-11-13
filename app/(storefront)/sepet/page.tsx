@@ -206,7 +206,7 @@ export default function SepetPage() {
 
   // ─── Main Cart & Checkout Page ────────────────────────────────
   return (
-    <div className="min-h-screen pt-28 pb-24 bg-[#f8fafc] text-slate-900">
+    <div className="min-h-screen pt-20 sm:pt-28 pb-14 sm:pb-24 bg-[#f8fafc] text-slate-900">
       <div className="max-w-screen-xl mx-auto px-6 space-y-8">
         {/* Breadcrumb / Stepper */}
         <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-200 pb-5">

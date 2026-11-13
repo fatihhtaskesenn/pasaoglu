@@ -302,7 +302,7 @@ export default function SetlerPage() {
   };
 
   return (
-    <div className="min-h-screen pt-28 pb-24 bg-gradient-to-b from-[#eef5fc] via-[#f8fafc] to-white text-[#0f172a]">
+    <div className="min-h-screen pt-20 sm:pt-28 pb-14 sm:pb-24 bg-gradient-to-b from-[#eef5fc] via-[#f8fafc] to-white text-[#0f172a]">
       {/* ─── Kurumsal Başlık Bandı ──────────────────────────── */}
       <section className="bg-gradient-to-r from-[#002b52] via-[#00447c] to-[#005596] text-white border-b border-[#005596]/20">
         <div className="max-w-screen-xl mx-auto px-6 py-11 sm:py-14">

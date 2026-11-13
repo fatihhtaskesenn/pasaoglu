@@ -52,8 +52,8 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
   };
 
   return (
-    <div className="min-h-screen pt-28 pb-24 bg-[#f8fafc] text-slate-900">
-      <div className="max-w-screen-xl mx-auto px-6 space-y-12">
+    <div className="min-h-screen pt-20 sm:pt-28 pb-14 sm:pb-24 bg-[#f8fafc] text-slate-900">
+      <div className="max-w-screen-xl mx-auto px-3 sm:px-6 space-y-8 sm:space-y-12">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Link
