@@ -266,10 +266,10 @@ export default function HomePage() {
       <HeroVideo />
 
       {/* ─── 10-Category Appliance Bar & Instagram Campaign Posts ─── */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 pt-6 pb-24 relative z-20">
+      <section className="max-w-screen-xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6 pb-12 sm:pb-24 relative z-20">
         {/* Category Strip */}
-        <div className="mb-12">
-          <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+        <div className="mb-5 sm:mb-12">
+          <div className="grid grid-cols-5 sm:grid-cols-5 lg:grid-cols-10 gap-1.5 sm:gap-2.5">
             {applianceCategories.map((cat) => {
               const isActive = activeCategory === cat.id;
               return (
@@ -277,7 +277,7 @@ export default function HomePage() {
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(isActive ? null : cat.id)}
-                  className={`group relative overflow-hidden rounded-2xl px-2 py-3.5 flex flex-col items-center justify-between gap-2 text-center transition-all duration-200 cursor-pointer select-none ${
+                  className={`group relative overflow-hidden rounded-xl sm:rounded-2xl px-1 py-2 sm:px-2 sm:py-3.5 flex flex-col items-center justify-between gap-1 sm:gap-2 text-center transition-all duration-200 cursor-pointer select-none ${
                     isActive
                       ? 'bg-[#003d6e] text-white ring-2 ring-amber-400 shadow-xl shadow-[#005596]/30 -translate-y-1'
                       : 'bg-gradient-to-b from-[#005da3] to-[#004b84] hover:from-[#0066b3] hover:to-[#005596] text-white shadow-md shadow-slate-900/10 hover:shadow-xl hover:shadow-[#005596]/25 hover:-translate-y-1'
@@ -287,12 +287,12 @@ export default function HomePage() {
                   <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
 
                   {/* Appliance SVG Icon */}
-                  <div className="w-11 h-10 rounded-xl bg-white/10 group-hover:bg-white/15 border border-white/15 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                  <div className="w-7 h-7 sm:w-11 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 group-hover:bg-white/15 border border-white/15 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-7 sm:[&>svg]:h-7">
                     {cat.icon}
                   </div>
 
                   {/* Category Label */}
-                  <span className="font-display text-[11px] font-bold tracking-wider uppercase leading-tight text-white drop-shadow-xs">
+                  <span className="font-display text-[9px] sm:text-[11px] font-bold tracking-tight sm:tracking-wider uppercase leading-tight text-white drop-shadow-xs line-clamp-1">
                     {cat.label}
                   </span>
 
@@ -338,21 +338,21 @@ export default function HomePage() {
 
         {/* ─── Latest 4 Instagram Campaign Posts (Directly Under Category Strip) ─── */}
         {!selectedCatObj && (
-          <div className="mb-16">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mb-6 sm:mb-16">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
               {igPosts.slice(0, 4).map((post, idx) => (
                 <motion.div
                   key={post.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: idx * 0.06 }}
-                  className="relative aspect-[54/77] rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shadow-sm"
+                  className="relative aspect-[54/77] rounded-lg sm:rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shadow-sm"
                 >
                   <Image
                     src={post.image}
                     alt={post.title}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover"
                     unoptimized={post.image.startsWith('http')}
                   />
@@ -364,11 +364,11 @@ export default function HomePage() {
 
         {/* Product Grid — Supabase Canlı Ürünler */}
         {productsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-8">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-96 rounded-2xl bg-white border border-slate-200 animate-pulse"
+                className="h-56 sm:h-96 rounded-xl sm:rounded-2xl bg-white border border-slate-200 animate-pulse"
               />
             ))}
           </div>
@@ -386,7 +386,7 @@ export default function HomePage() {
         ) : (
           <motion.div
             layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-8"
           >
             {displayedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

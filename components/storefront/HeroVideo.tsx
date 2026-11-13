@@ -82,9 +82,9 @@ export function HeroVideo() {
   }, [nextSlide, currentIndex, slides.length]);
 
   return (
-    <section className="group relative w-full h-[calc(100vh)] min-h-[560px] overflow-hidden bg-[#0a1322] select-none">
+    <section className="group relative w-full h-[260px] min-h-[240px] sm:h-[calc(100vh)] sm:min-h-[560px] overflow-hidden bg-[#0a1322] select-none">
       {/* ─── Full HD Fotoğraf Kesintisiz Döngü & Sinematik Geçiş Katmanı ─── */}
-      <div className="absolute inset-x-0 top-20 sm:top-28 bottom-0 overflow-hidden">
+      <div className="absolute inset-x-0 top-16 sm:top-28 bottom-0 overflow-hidden">
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
           const isContain = slide.fitMode === 'contain';
@@ -152,21 +152,21 @@ export function HeroVideo() {
         type="button"
         onClick={prevSlide}
         aria-label="Önceki Fotoğraf"
-        className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-slate-900/35 hover:bg-[#005596]/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
+        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-slate-900/45 sm:bg-slate-900/35 hover:bg-[#005596]/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
       >
-        <ChevronLeft size={22} />
+        <ChevronLeft size={18} className="sm:w-[22px] sm:h-[22px]" />
       </button>
       <button
         type="button"
         onClick={nextSlide}
         aria-label="Sonraki Fotoğraf"
-        className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-slate-900/35 hover:bg-[#005596]/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
+        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-slate-900/45 sm:bg-slate-900/35 hover:bg-[#005596]/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={18} className="sm:w-[22px] sm:h-[22px]" />
       </button>
 
       {/* ─── Alt İlerleme Çubukları (Fotoğraf Döngü Göstergesi) ─── */}
-      <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-950/35 backdrop-blur-md border border-white/15">
+      <div className="absolute bottom-3 sm:bottom-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 sm:gap-2.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-slate-950/35 backdrop-blur-md border border-white/15">
         {slides.map((slide, idx) => {
           const isActive = idx === currentIndex;
           return (
