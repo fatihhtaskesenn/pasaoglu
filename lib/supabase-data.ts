@@ -15,6 +15,16 @@ export interface CampaignRecord {
   created_at?: string;
 }
 
+export interface HomepageSlideRecord {
+  id: string;
+  title: string;
+  image_url: string;
+  fit_mode: 'cover' | 'contain';
+  display_order: number;
+  is_active: boolean;
+  created_at?: string;
+}
+
 export interface ProductInput {
   name: string;
   brand: string;
@@ -47,7 +57,7 @@ function slugifyTurkish(text: string): string {
 
 export async function uploadMediaFile(
   file: File,
-  folder: 'products' | 'campaigns' = 'products'
+  folder: 'products' | 'campaigns' | 'homepage' = 'products'
 ): Promise<{
   url: string | null;
   error: string | null;
@@ -59,13 +69,15 @@ export async function uploadMediaFile(
     return { url: null, error: 'Supabase bağlantısı henüz yapılandırılmamış (.env.local).' };
   }
 
-  // Ürün ve kampanya görsellerini canlılığını koruyarak düşük boyutlu WebP'ye dönüştür
-  const optimized = await optimizeImageForWeb(
-    file,
-    folder === 'campaigns'
-      ? { maxDimension: 1600, targetMaxBytes: 260 * 1024, initialQuality: 0.85, minQuality: 0.72 }
-      : { maxDimension: 1200, targetMaxBytes: 180 * 1024, initialQuality: 0.84, minQuality: 0.7 }
-  );
+  // Ürün, kampanya ve ana sayfa görsellerini canlılığını koruyarak düşük boyutlu WebP'ye dönüştür
+  const optimizeConfig =
+    folder === 'homepage'
+      ? { maxDimension: 1920, targetMaxBytes: 320 * 1024, initialQuality: 0.86, minQuality: 0.74 }
+      : folder === 'campaigns'
+        ? { maxDimension: 1600, targetMaxBytes: 260 * 1024, initialQuality: 0.85, minQuality: 0.72 }
+        : { maxDimension: 1200, targetMaxBytes: 180 * 1024, initialQuality: 0.84, minQuality: 0.7 };
+
+  const optimized = await optimizeImageForWeb(file, optimizeConfig);
 
   const fileToUpload = optimized.file;
   const ext = fileToUpload.name.split('.').pop() || 'webp';
@@ -330,6 +342,83 @@ export async function deleteCampaignInSupabase(id: string): Promise<{ error: str
   if (!supabase) return { error: 'Supabase bağlantısı yok.' };
 
   const { error } = await supabase.from('campaigns').delete().eq('id', id);
+  return { error: error ? error.message : null };
+}
+
+// ─── Ana Sayfa Hero Görselleri (Supabase) ──────────────────────────────────
+
+export async function fetchHomepageSlidesFromSupabase(): Promise<HomepageSlideRecord[]> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('homepage_slides')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error || !data) return [];
+  return data as HomepageSlideRecord[];
+}
+
+export async function createHomepageSlideInSupabase(input: {
+  title?: string;
+  image_url: string;
+  fit_mode?: 'cover' | 'contain';
+  display_order?: number;
+}): Promise<{ slide: HomepageSlideRecord | null; error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return { slide: null, error: 'Supabase bağlantısı henüz yapılandırılmamış (.env.local).' };
+  }
+
+  const { data, error } = await supabase
+    .from('homepage_slides')
+    .insert({
+      title: input.title?.trim() || 'Paşaoğlu Mağazaları',
+      image_url: input.image_url,
+      fit_mode: input.fit_mode || 'contain',
+      display_order: input.display_order ?? 0,
+      is_active: true,
+    })
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    const msg = error?.message || '';
+    if (msg.includes('homepage_slides') || error?.code === 'PGRST205') {
+      return {
+        slide: null,
+        error:
+          'Supabase veritabanında "homepage_slides" tablosu henüz oluşturulmamış. Supabase SQL Editor üzerinden SQL kodunu çalıştırıp tekrar deneyin.',
+      };
+    }
+    return { slide: null, error: msg || 'Ana sayfa görseli eklenemedi.' };
+  }
+  return { slide: data as HomepageSlideRecord, error: null };
+}
+
+export async function updateHomepageSlideOrderInSupabase(
+  id: string,
+  display_order: number
+): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Supabase bağlantısı yok.' };
+
+  const { error } = await supabase
+    .from('homepage_slides')
+    .update({ display_order })
+    .eq('id', id);
+
+  return { error: error ? error.message : null };
+}
+
+export async function deleteHomepageSlideInSupabase(id: string): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Supabase bağlantısı yok.' };
+
+  const { error } = await supabase.from('homepage_slides').delete().eq('id', id);
   return { error: error ? error.message : null };
 }
 

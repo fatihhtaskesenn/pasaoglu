@@ -168,6 +168,24 @@ CREATE POLICY "Allow all on orders" ON public.orders FOR ALL USING (true) WITH C
 CREATE POLICY "Allow all on monthly_financials" ON public.monthly_financials FOR ALL USING (true) WITH CHECK (true);
 
 -- ----------------------------------------------------------------------------
+-- 8B. ANA SAYFA HERO GÖRSELLERİ TABLOSU (homepage_slides)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.homepage_slides (
+  id TEXT PRIMARY KEY DEFAULT ('slide-' || substr(gen_random_uuid()::text, 1, 8)),
+  title TEXT NOT NULL DEFAULT '',
+  image_url TEXT NOT NULL,
+  fit_mode TEXT NOT NULL DEFAULT 'contain' CHECK (fit_mode IN ('cover', 'contain')),
+  display_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.homepage_slides ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all on homepage_slides" ON public.homepage_slides FOR ALL USING (true) WITH CHECK (true);
+
+NOTIFY pgrst, 'reload schema';
+
+-- ----------------------------------------------------------------------------
 -- 9. FOTOĞRAF DEPOLAMA ALANI (Supabase Storage Bucket: "pasaoglu-media")
 -- Admin panelinden ürün ve kampanya görselleri yüklemek için
 -- ----------------------------------------------------------------------------

@@ -3,14 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { fetchHomepageSlidesFromSupabase } from '@/lib/supabase-data';
 
 interface HeroSlide {
   src: string;
   alt: string;
   objectPosition?: string;
+  fitMode?: 'cover' | 'contain';
 }
 
-const heroSlides: HeroSlide[] = [
+const defaultHeroSlides: HeroSlide[] = [
   {
     src: '/resim/magaza-foto/akkent4.png',
     alt: 'Paşaoğlu Mağazaları — Akkent Profilo Yetkili Satış Mağazası Dış Cephe',
@@ -46,30 +48,49 @@ const heroSlides: HeroSlide[] = [
 const SLIDE_DURATION_MS = 4800;
 
 export function HeroVideo() {
+  const [slides, setSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % heroSlides.length);
+  useEffect(() => {
+    fetchHomepageSlidesFromSupabase().then((liveSlides) => {
+      if (liveSlides.length > 0) {
+        setSlides(
+          liveSlides.map((s) => ({
+            src: s.image_url,
+            alt: s.title || 'Paşaoğlu Mağazaları',
+            objectPosition: 'center center',
+            fitMode: s.fit_mode || 'contain',
+          }))
+        );
+        setCurrentIndex(0);
+      }
+    });
   }, []);
+
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  }, []);
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(nextSlide, SLIDE_DURATION_MS);
     return () => clearInterval(timer);
-  }, [nextSlide, currentIndex]);
+  }, [nextSlide, currentIndex, slides.length]);
 
   return (
     <section className="group relative w-full h-[calc(100vh)] min-h-[560px] overflow-hidden bg-[#0a1322] select-none">
-      {/* ─── Full HD 6-Fotoğraf Kesintisiz Döngü & Sinematik Geçiş Katmanı ─── */}
+      {/* ─── Full HD Fotoğraf Kesintisiz Döngü & Sinematik Geçiş Katmanı ─── */}
       <div className="absolute inset-x-0 top-20 sm:top-28 bottom-0 overflow-hidden">
-        {heroSlides.map((slide, index) => {
+        {slides.map((slide, index) => {
           const isActive = index === currentIndex;
+          const isContain = slide.fitMode === 'contain';
           return (
             <motion.div
-              key={slide.src}
+              key={`${slide.src}-${index}`}
               initial={false}
               animate={{
                 opacity: isActive ? 1 : 0,
@@ -90,6 +111,16 @@ export function HeroVideo() {
               }}
               className="absolute inset-0 w-full h-full will-change-[opacity,transform,filter]"
             >
+              {isContain && (
+                /* Tam Sığdır modunda kenar boşluklarını yumuşak bulanık arka planla doldur */
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={slide.src}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-45 select-none pointer-events-none"
+                />
+              )}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={slide.src}
@@ -98,7 +129,9 @@ export function HeroVideo() {
                 decoding="sync"
                 draggable={false}
                 style={{ objectPosition: slide.objectPosition || 'center center' }}
-                className="w-full h-full object-cover select-none"
+                className={`relative z-10 w-full h-full select-none ${
+                  isContain ? 'object-contain p-2 sm:p-4' : 'object-cover'
+                }`}
               />
             </motion.div>
           );
@@ -132,16 +165,16 @@ export function HeroVideo() {
         <ChevronRight size={22} />
       </button>
 
-      {/* ─── Alt İlerleme Çubukları (6 Fotoğraf Döngü Göstergesi) ─── */}
+      {/* ─── Alt İlerleme Çubukları (Fotoğraf Döngü Göstergesi) ─── */}
       <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-950/35 backdrop-blur-md border border-white/15">
-        {heroSlides.map((slide, idx) => {
+        {slides.map((slide, idx) => {
           const isActive = idx === currentIndex;
           return (
             <button
-              key={slide.src}
+              key={`${slide.src}-${idx}`}
               type="button"
               onClick={() => setCurrentIndex(idx)}
-              aria-label={`${idx + 1}. Mağaza Fotoğrafı`}
+              aria-label={`${idx + 1}. Ana Sayfa Görseli`}
               className={`relative h-1.5 rounded-full overflow-hidden transition-all duration-300 cursor-pointer ${
                 isActive ? 'w-9 bg-white/30' : 'w-2.5 bg-white/45 hover:bg-white/75'
               }`}

@@ -12,6 +12,11 @@ import {
   Minus,
   Check,
   X,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import {
@@ -23,8 +28,13 @@ import {
   fetchCampaignsFromSupabase,
   createCampaignInSupabase,
   deleteCampaignInSupabase,
+  fetchHomepageSlidesFromSupabase,
+  createHomepageSlideInSupabase,
+  updateHomepageSlideOrderInSupabase,
+  deleteHomepageSlideInSupabase,
   uploadMediaFile,
   type CampaignRecord,
+  type HomepageSlideRecord,
 } from '@/lib/supabase-data';
 import { CATEGORY_TEMPLATES } from '@/lib/category-templates';
 import { formatFileSize } from '@/lib/image-optimizer';
@@ -32,9 +42,10 @@ import { formatPrice } from '@/lib/utils';
 import type { Product } from '@/types';
 
 export default function AdminCatalogPage() {
-  const [activeTab, setActiveTab] = useState<'products' | 'campaigns'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'campaigns' | 'homepage'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignRecord[]>([]);
+  const [homepageSlides, setHomepageSlides] = useState<HomepageSlideRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -46,14 +57,17 @@ export default function AdminCatalogPage() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   // Temel Ürün Alanları
+  const MAX_PRODUCT_IMAGES = 5;
   const [selectedTag, setSelectedTag] = useState('buzdolabi');
   const [selectedSubTypeId, setSelectedSubTypeId] = useState('supurge');
   const [prodName, setProdName] = useState('');
+  const [prodModelCode, setProdModelCode] = useState('');
   const [prodBrand, setProdBrand] = useState('Profilo');
   const [prodPrice, setProdPrice] = useState('');
   const [prodDiscounted, setProdDiscounted] = useState('');
   const [prodStock, setProdStock] = useState('10');
-  const [prodImageUrl, setProdImageUrl] = useState('');
+  const [prodImages, setProdImages] = useState<string[]>([]);
+  const [prodImageInput, setProdImageInput] = useState('');
   const [prodDesc, setProdDesc] = useState('');
 
   // Dinamik Makine Özellikleri & Seçili Hızlı Metin Kutuları
@@ -75,14 +89,23 @@ export default function AdminCatalogPage() {
   const [uploadingCampImg, setUploadingCampImg] = useState(false);
   const [savingCampaign, setSavingCampaign] = useState(false);
 
+  // Ana Sayfa Hero Görselleri Formu
+  const [slideTitle, setSlideTitle] = useState('');
+  const [slideImageUrl, setSlideImageUrl] = useState('');
+  const [slideFitMode, setSlideFitMode] = useState<'contain' | 'cover'>('contain');
+  const [uploadingSlideImg, setUploadingSlideImg] = useState(false);
+  const [savingSlide, setSavingSlide] = useState(false);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
-    const [p, c] = await Promise.all([
+    const [p, c, s] = await Promise.all([
       fetchProductsFromSupabase(),
       fetchCampaignsFromSupabase(),
+      fetchHomepageSlidesFromSupabase(),
     ]);
     setProducts(p);
     setCampaigns(c);
+    setHomepageSlides(s);
     setLoading(false);
   }, []);
 
@@ -133,11 +156,13 @@ export default function AdminCatalogPage() {
   const resetForm = () => {
     setEditingProductId(null);
     setProdName('');
+    setProdModelCode('');
     setProdBrand('Profilo');
     setProdPrice('');
     setProdDiscounted('');
     setProdStock('10');
-    setProdImageUrl('');
+    setProdImages([]);
+    setProdImageInput('');
     setProdDesc('');
     setSpecValues({});
     setFeaturesList([]);
@@ -147,6 +172,10 @@ export default function AdminCatalogPage() {
   const handleStartEdit = (item: Product) => {
     setEditingProductId(item.id);
     setProdName(item.name);
+    const modelFeature = item.features?.find((f) => f.startsWith('Model Kodu:'));
+    setProdModelCode(
+      modelFeature ? modelFeature.replace('Model Kodu:', '').trim() : ''
+    );
     setProdBrand(item.brand || 'Profilo');
     const matchedTag =
       CATEGORY_TEMPLATES.find((t) => item.tags?.includes(t.tag))?.tag || 'buzdolabi';
@@ -154,10 +183,16 @@ export default function AdminCatalogPage() {
     setProdPrice(String(item.price));
     setProdDiscounted(item.discountedPrice ? String(item.discountedPrice) : '');
     setProdStock(String(item.stock));
-    setProdImageUrl(item.images?.[0] || '');
+    const existingImages = (item.images || []).filter(
+      (img) => img && img !== '/resim/pasaoglulogo-crop.png'
+    );
+    setProdImages(existingImages.slice(0, MAX_PRODUCT_IMAGES));
+    setProdImageInput('');
     setProdDesc(item.description || '');
     setSpecValues({});
-    setFeaturesList(item.features || []);
+    setFeaturesList(
+      (item.features || []).filter((f) => !f.startsWith('Model Kodu:'))
+    );
     setStatusMessage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -174,19 +209,173 @@ export default function AdminCatalogPage() {
     return `${label} yüklendi${optimizedSize ? ` (${formatFileSize(optimizedSize)})` : ''}.`;
   };
 
-  const uploadProductFile = async (file: File) => {
+  const uploadProductFiles = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileArray.length === 0) return;
+
+    const remaining = MAX_PRODUCT_IMAGES - prodImages.length;
+    if (remaining <= 0) {
+      setStatusMessage({
+        type: 'error',
+        text: `Bir ürün için en fazla ${MAX_PRODUCT_IMAGES} görsel ekleyebilirsiniz.`,
+      });
+      return;
+    }
+
+    const filesToUpload = fileArray.slice(0, remaining);
     setUploadingProdImg(true);
-    const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'products');
+
+    const uploadedUrls: string[] = [];
+    let totalOrig = 0;
+    let totalOpt = 0;
+    let lastError: string | null = null;
+
+    for (const file of filesToUpload) {
+      const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'products');
+      if (error || !url) {
+        lastError = error || 'Görsel yüklenemedi.';
+      } else {
+        uploadedUrls.push(url);
+        totalOrig += originalSize || 0;
+        totalOpt += optimizedSize || 0;
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      setProdImages((prev) => [...prev, ...uploadedUrls].slice(0, MAX_PRODUCT_IMAGES));
+      const baseMsg = formatUploadMessage(
+        uploadedUrls.length > 1
+          ? `${uploadedUrls.length} ürün fotoğrafı`
+          : 'Ürün fotoğrafı',
+        totalOrig,
+        totalOpt
+      );
+      const skippedNotice =
+        fileArray.length > remaining
+          ? ` (En fazla ${MAX_PRODUCT_IMAGES} görsel sınırı nedeniyle ${fileArray.length - remaining} görsel atlandı.)`
+          : '';
+      setStatusMessage({ type: 'success', text: `${baseMsg}${skippedNotice}` });
+    } else if (lastError) {
+      setStatusMessage({ type: 'error', text: lastError });
+    }
+
+    setUploadingProdImg(false);
+  };
+
+  const addProductImageUrl = () => {
+    const trimmed = prodImageInput.trim();
+    if (!trimmed) return;
+    if (prodImages.length >= MAX_PRODUCT_IMAGES) {
+      setStatusMessage({
+        type: 'error',
+        text: `Bir ürün için en fazla ${MAX_PRODUCT_IMAGES} görsel ekleyebilirsiniz.`,
+      });
+      return;
+    }
+    if (!prodImages.includes(trimmed)) {
+      setProdImages((prev) => [...prev, trimmed]);
+    }
+    setProdImageInput('');
+  };
+
+  const removeProductImage = (index: number) => {
+    setProdImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const setCoverProductImage = (index: number) => {
+    if (index === 0) return;
+    setProdImages((prev) => {
+      const next = [...prev];
+      const [picked] = next.splice(index, 1);
+      return [picked, ...next];
+    });
+  };
+
+  const moveProductImage = (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= prodImages.length) return;
+    setProdImages((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(index, 1);
+      next.splice(targetIndex, 0, item);
+      return next;
+    });
+  };
+
+  const handleSlideFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSlideImg(true);
+    const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'homepage');
     if (error || !url) {
-      setStatusMessage({ type: 'error', text: error || 'Görsel yüklenemedi.' });
+      setStatusMessage({ type: 'error', text: error || 'Ana sayfa görseli yüklenemedi.' });
     } else {
-      setProdImageUrl(url);
+      setSlideImageUrl(url);
       setStatusMessage({
         type: 'success',
-        text: formatUploadMessage('Ürün fotoğrafı', originalSize, optimizedSize),
+        text: formatUploadMessage('Ana sayfa görseli', originalSize, optimizedSize),
       });
     }
-    setUploadingProdImg(false);
+    setUploadingSlideImg(false);
+    e.target.value = '';
+  };
+
+  const handleCreateSlide = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slideImageUrl.trim()) return;
+    setSavingSlide(true);
+    setStatusMessage(null);
+
+    const nextOrder =
+      homepageSlides.length > 0
+        ? Math.max(...homepageSlides.map((s) => s.display_order || 0)) + 1
+        : 1;
+
+    const { error } = await createHomepageSlideInSupabase({
+      title: slideTitle,
+      image_url: slideImageUrl.trim(),
+      fit_mode: slideFitMode,
+      display_order: nextOrder,
+    });
+
+    if (error) {
+      setStatusMessage({ type: 'error', text: error });
+    } else {
+      setSlideTitle('');
+      setSlideImageUrl('');
+      setSlideFitMode('contain');
+      setStatusMessage({ type: 'success', text: 'Ana sayfa görseli eklendi.' });
+      await loadAll();
+    }
+    setSavingSlide(false);
+  };
+
+  const handleMoveSlide = async (index: number, direction: -1 | 1) => {
+    const targetIdx = index + direction;
+    if (targetIdx < 0 || targetIdx >= homepageSlides.length) return;
+
+    const currentSlide = homepageSlides[index];
+    const swapSlide = homepageSlides[targetIdx];
+
+    const updated = [...homepageSlides];
+    updated[index] = swapSlide;
+    updated[targetIdx] = currentSlide;
+    setHomepageSlides(updated);
+
+    await Promise.all([
+      updateHomepageSlideOrderInSupabase(currentSlide.id, targetIdx + 1),
+      updateHomepageSlideOrderInSupabase(swapSlide.id, index + 1),
+    ]);
+  };
+
+  const handleDeleteSlide = async (id: string, title: string) => {
+    const { error } = await deleteHomepageSlideInSupabase(id);
+    if (error) {
+      setStatusMessage({ type: 'error', text: error });
+    } else {
+      setStatusMessage({ type: 'success', text: `"${title || 'Görsel'}" kaldırıldı.` });
+      await loadAll();
+    }
   };
 
   const handleCampaignFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,7 +408,17 @@ export default function AdminCatalogPage() {
       })
       .filter(Boolean);
 
-    const mergedFeatures = Array.from(new Set([...dynamicFeatureLines, ...featuresList]));
+    const modelCodeLine = prodModelCode.trim()
+      ? [`Model Kodu: ${prodModelCode.trim().toUpperCase()}`]
+      : [];
+
+    const mergedFeatures = Array.from(
+      new Set([
+        ...modelCodeLine,
+        ...dynamicFeatureLines,
+        ...featuresList.filter((f) => !f.startsWith('Model Kodu:')),
+      ])
+    );
     const tags = activeSubType
       ? [activeTemplate.tag, activeSubType.extraTag]
       : [activeTemplate.tag];
@@ -229,6 +428,11 @@ export default function AdminCatalogPage() {
       (mergedFeatures.length > 0
         ? `${prodName.trim()} — ${mergedFeatures.slice(0, 4).join(', ')}.`
         : `${prodName.trim()} — Resmi Profilo Yetkili Bayisi Paşaoğlu Mağazaları güvencesiyle.`);
+
+    const finalImages =
+      prodImages.length > 0
+        ? prodImages.slice(0, MAX_PRODUCT_IMAGES)
+        : ['/resim/pasaoglulogo-crop.png'];
 
     const payload = {
       name: prodName,
@@ -240,7 +444,7 @@ export default function AdminCatalogPage() {
       description: autoDesc,
       features: mergedFeatures,
       tags,
-      images: prodImageUrl.trim() ? [prodImageUrl.trim()] : ['/resim/pasaoglulogo-crop.png'],
+      images: finalImages,
       isNew: true,
     };
 
@@ -360,7 +564,7 @@ export default function AdminCatalogPage() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('products')}
@@ -384,6 +588,18 @@ export default function AdminCatalogPage() {
           >
             <Megaphone size={15} />
             Kampanyalar ({campaigns.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('homepage')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'homepage'
+                ? 'bg-[#005596] text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <ImageIcon size={15} />
+            Ana Sayfa Görselleri ({homepageSlides.length})
           </button>
         </div>
       </div>
@@ -487,11 +703,9 @@ export default function AdminCatalogPage() {
             )}
 
             {/* 2. Temel Bilgiler */}
-            <div className="grid grid-cols-3 gap-2.5">
-              <div className="col-span-2">
-                <label className="block text-[11px] font-bold text-slate-500 mb-1">
-                  Ürün Adı & Model Kodu *
-                </label>
+            <div className="space-y-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 mb-1">Ürün Adı *</label>
                 <input
                   type="text"
                   required
@@ -501,14 +715,29 @@ export default function AdminCatalogPage() {
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
                 />
               </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 mb-1">Marka</label>
-                <input
-                  type="text"
-                  value={prodBrand}
-                  onChange={(e) => setProdBrand(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                    Ürün / Model Kodu
+                  </label>
+                  <input
+                    type="text"
+                    value={prodModelCode}
+                    onChange={(e) => setProdModelCode(e.target.value)}
+                    placeholder="Örn: BD3086WEXN"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-mono uppercase text-slate-900 focus:outline-none focus:border-[#005596]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1">Marka</label>
+                  <input
+                    type="text"
+                    value={prodBrand}
+                    onChange={(e) => setProdBrand(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
+                  />
+                </div>
               </div>
             </div>
 
@@ -664,41 +893,146 @@ export default function AdminCatalogPage() {
               )}
             </div>
 
-            {/* 5. Fotoğraf & Kısa Açıklama */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 mb-1">
-                Ürün Fotoğrafı
-              </label>
+            {/* 5. Çoklu Ürün Fotoğrafları (Maks. 5 Adet) */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-bold text-slate-500">
+                  Ürün Fotoğrafları (En fazla {MAX_PRODUCT_IMAGES} adet)
+                </label>
+                <span className="text-[11px] font-semibold text-[#005596]">
+                  {prodImages.length} / {MAX_PRODUCT_IMAGES} Görsel
+                </span>
+              </div>
+
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault();
-                  const file = e.dataTransfer.files?.[0];
-                  if (file) uploadProductFile(file);
+                  if (e.dataTransfer.files?.length) {
+                    uploadProductFiles(e.dataTransfer.files);
+                  }
                 }}
                 className="flex items-center gap-2"
               >
                 <input
                   type="text"
-                  value={prodImageUrl}
-                  onChange={(e) => setProdImageUrl(e.target.value)}
-                  placeholder="Görsel URL veya sürükle bırak..."
-                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                  value={prodImageInput}
+                  onChange={(e) => setProdImageInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addProductImageUrl();
+                    }
+                  }}
+                  disabled={prodImages.length >= MAX_PRODUCT_IMAGES}
+                  placeholder={
+                    prodImages.length >= MAX_PRODUCT_IMAGES
+                      ? 'Maksimum 5 görsele ulaşıldı'
+                      : 'Görsel URL yapıştırın veya sürükleyip bırakın...'
+                  }
+                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596] disabled:bg-slate-50"
                 />
-                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
+                {prodImageInput.trim() && (
+                  <button
+                    type="button"
+                    onClick={addProductImageUrl}
+                    className="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0"
+                  >
+                    + Ekle
+                  </button>
+                )}
+                <label
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 ${
+                    prodImages.length >= MAX_PRODUCT_IMAGES
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer'
+                  }`}
+                >
                   <Upload size={13} />
-                  {uploadingProdImg ? '...' : 'Seç'}
+                  {uploadingProdImg ? 'Yükleniyor...' : 'Çoklu Seç'}
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
+                    disabled={prodImages.length >= MAX_PRODUCT_IMAGES || uploadingProdImg}
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) uploadProductFile(file);
+                      if (e.target.files?.length) {
+                        uploadProductFiles(e.target.files);
+                        e.target.value = '';
+                      }
                     }}
                     className="hidden"
                   />
                 </label>
               </div>
+
+              {prodImages.length > 0 && (
+                <div className="grid grid-cols-5 gap-2 pt-1">
+                  {prodImages.map((imgUrl, idx) => (
+                    <div
+                      key={`${imgUrl}-${idx}`}
+                      className="group relative aspect-square rounded-xl border border-slate-200 bg-slate-50 overflow-hidden"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imgUrl}
+                        alt={`Ürün görseli ${idx + 1}`}
+                        className="w-full h-full object-contain p-1 pb-5"
+                      />
+                      <span
+                        className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                          idx === 0
+                            ? 'bg-[#005596] text-white'
+                            : 'bg-slate-800/75 text-white'
+                        }`}
+                      >
+                        {idx === 0 ? '1 • Kapak' : `${idx + 1}`}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => removeProductImage(idx)}
+                        title="Görseli kaldır"
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-85 hover:opacity-100 cursor-pointer"
+                      >
+                        <X size={11} />
+                      </button>
+
+                      {/* Sıralama & Kapak Kontrolleri */}
+                      <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-0.5">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => moveProductImage(idx, -1)}
+                          title="Sola taşı"
+                          className="w-5 h-5 rounded bg-slate-900/75 hover:bg-slate-900 text-white flex items-center justify-center disabled:opacity-30 cursor-pointer"
+                        >
+                          <ChevronLeft size={12} />
+                        </button>
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setCoverProductImage(idx)}
+                            title="1. sıraya (Kapak) al"
+                            className="px-1 py-0.5 rounded bg-[#005596]/90 hover:bg-[#005596] text-white text-[8px] font-bold cursor-pointer truncate"
+                          >
+                            Kapak
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          disabled={idx === prodImages.length - 1}
+                          onClick={() => moveProductImage(idx, 1)}
+                          title="Sağa taşı"
+                          className="w-5 h-5 rounded bg-slate-900/75 hover:bg-slate-900 text-white flex items-center justify-center disabled:opacity-30 cursor-pointer"
+                        >
+                          <ChevronRight size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
@@ -880,7 +1214,7 @@ export default function AdminCatalogPage() {
             )}
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'campaigns' ? (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           <form
             onSubmit={handleCreateCampaign}
@@ -976,6 +1310,188 @@ export default function AdminCatalogPage() {
                       >
                         <Trash2 size={15} />
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <form
+            onSubmit={handleCreateSlide}
+            className="xl:col-span-4 bg-white border border-slate-200 rounded-2xl p-5 space-y-4 h-fit"
+          >
+            <div>
+              <h2 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                <Plus size={16} className="text-[#005596]" />
+                Ana Sayfa Vitrini Görseli Ekle
+              </h2>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Ana sayfanın en üstündeki büyük vitrin alanında dönecek görselleri buradan seçebilirsiniz.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                Görsel Açıklaması (Opsiyonel)
+              </label>
+              <input
+                type="text"
+                value={slideTitle}
+                onChange={(e) => setSlideTitle(e.target.value)}
+                placeholder="Örn: Akkent Showroom Dış Cephe"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                Ekrana Sığdırma Modu
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSlideFitMode('contain')}
+                  className={`px-3 py-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer ${
+                    slideFitMode === 'contain'
+                      ? 'bg-[#005596] text-white border-[#005596]'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Tam Sığdır (Kesme Yok)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSlideFitMode('cover')}
+                  className={`px-3 py-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer ${
+                    slideFitMode === 'cover'
+                      ? 'bg-[#005596] text-white border-[#005596]'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Tam Ekran Doldur
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                Ana Sayfa Görseli *
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={slideImageUrl}
+                  onChange={(e) => setSlideImageUrl(e.target.value)}
+                  placeholder="URL veya bilgisayarınızdan seçin"
+                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
+                  <Upload size={13} />
+                  {uploadingSlideImg ? '...' : 'Seç'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleSlideFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {slideImageUrl && (
+              <div className="relative h-36 rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slideImageUrl}
+                  alt="Önizleme"
+                  className={`w-full h-full ${
+                    slideFitMode === 'contain' ? 'object-contain p-1' : 'object-cover'
+                  }`}
+                />
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={savingSlide || !isSupabaseConfigured}
+              className="w-full py-2.5 rounded-xl bg-[#005596] hover:bg-[#004478] text-white font-bold text-sm cursor-pointer disabled:opacity-50"
+            >
+              {savingSlide ? 'Kaydediliyor...' : 'Ana Sayfaya Ekle'}
+            </button>
+          </form>
+
+          <div className="xl:col-span-8 bg-white border border-slate-200 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base font-display font-bold text-slate-900">
+                  Ana Sayfa Vitrin Görselleri ({homepageSlides.length})
+                </h2>
+                <p className="text-[11px] text-slate-500">
+                  Liste boşsa sitedeki varsayılan mağaza fotoğrafları gösterilir; eklediğiniz anda sizin seçtikleriniz sırayla yayınlanır.
+                </p>
+              </div>
+            </div>
+
+            {homepageSlides.length === 0 ? (
+              <p className="text-sm text-slate-400 py-8 text-center">
+                Henüz özel ana sayfa görseli eklenmemiş. Sol taraftan görsel ekleyebilirsiniz.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {homepageSlides.map((slide, idx) => (
+                  <div
+                    key={slide.id}
+                    className="border border-slate-200 rounded-xl overflow-hidden bg-white flex flex-col"
+                  >
+                    <div className="relative h-44 bg-slate-900">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={slide.image_url}
+                        alt={slide.title}
+                        className={`w-full h-full ${
+                          slide.fit_mode === 'contain' ? 'object-contain p-1' : 'object-cover'
+                        }`}
+                      />
+                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-slate-950/75 text-white text-[10px] font-bold">
+                        Sıra {idx + 1} • {slide.fit_mode === 'contain' ? 'Tam Sığdır' : 'Tam Doldur'}
+                      </span>
+                    </div>
+                    <div className="p-3 flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-slate-900 truncate">
+                        {slide.title || `Görsel ${idx + 1}`}
+                      </p>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveSlide(idx, -1)}
+                          title="Yukarı / Öne al"
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 cursor-pointer"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === homepageSlides.length - 1}
+                          onClick={() => handleMoveSlide(idx, 1)}
+                          title="Aşağı / Sona al"
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 cursor-pointer"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSlide(slide.id, slide.title)}
+                          title="Görseli sil"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

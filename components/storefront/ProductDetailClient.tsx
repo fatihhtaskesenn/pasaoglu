@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Product } from '@/types';
 import { formatPrice, discountPercent } from '@/lib/utils';
 import { useCartStore } from '@/store';
-import { ProductCard, renderApplianceIllustration } from '@/components/storefront/ProductCard';
+import { ProductCard } from '@/components/storefront/ProductCard';
 import {
   Star,
   Check,
@@ -28,7 +28,14 @@ interface ProductDetailClientProps {
 export function ProductDetailClient({ product, related }: ProductDetailClientProps) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
   const addItem = useCartStore((s) => s.addItem);
+
+  const productImages =
+    product.images && product.images.length > 0
+      ? product.images
+      : ['/resim/pasaoglulogo-crop.png'];
+  const currentImage = productImages[activeImageIdx] || productImages[0];
 
   const effectivePrice = product.discountedPrice ?? product.price;
   const hasDiscount = Boolean(product.discountedPrice && product.discountedPrice < product.price);
@@ -80,8 +87,38 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
 
               {/* Studio Appliance Photograph */}
               <div className="my-6 w-full flex items-center justify-center">
-                {renderApplianceIllustration(product, 'detail')}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage}
+                  alt={product.name}
+                  className="w-full h-72 sm:h-88 object-contain select-none transition-all duration-200"
+                />
               </div>
+
+              {/* Çoklu Ürün Görseli Küçük Önizlemeleri */}
+              {productImages.length > 1 && (
+                <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+                  {productImages.map((imgUrl, idx) => (
+                    <button
+                      key={`${imgUrl}-${idx}`}
+                      type="button"
+                      onClick={() => setActiveImageIdx(idx)}
+                      className={`w-14 h-14 rounded-xl border p-1 bg-white transition-all cursor-pointer ${
+                        idx === activeImageIdx
+                          ? 'border-[#005596] ring-2 ring-[#005596]/25'
+                          : 'border-slate-200 hover:border-slate-300 opacity-75 hover:opacity-100'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imgUrl}
+                        alt={`${product.name} ${idx + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Official Dealer Badge */}
               <div className="mt-2 flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
