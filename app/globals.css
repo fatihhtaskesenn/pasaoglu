@@ -1,26 +1,170 @@
 @import "tailwindcss";
 
+@theme {
+  /* Aydınlık, ferah ve lüks beyaz/açık tema */
+  --color-paper: #f8fafc;
+  --color-paper-raised: #ffffff;
+  --color-ink: #0f172a;
+  --color-ink-soft: #475569;
+  --color-line: #e2e8f0;
+
+  --color-obsidian: #f8fafc;
+  --color-charcoal: #ffffff;
+  --color-card-bg: #ffffff;
+  --color-platinum: #0f172a;
+  --color-amber-gold: #d97706;
+  --color-amber-gold-light: #f59e0b;
+  --color-steel: #64748b;
+  --color-muted: #64748b;
+
+  --font-sans: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-outfit), var(--font-jakarta), system-ui, sans-serif;
+  --font-body: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  --font-ui: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #d97706;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #d97706;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #d97706;
+  --radius: 0.875rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  font-size: 100%;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 125%;
   }
 }
 
+/* Ana kapsayıcıların sağ-sol boşluklarını azaltıp ekranı doyurucu kullanması */
+.max-w-screen-xl {
+  max-width: min(94vw, 86rem) !important;
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-outfit), var(--font-jakarta), system-ui, sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.font-body,
+.font-ui {
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/* Doğal şeffaf logo stili */
+.brand-logo {
+  object-fit: contain;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-gold {
+  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.25);
+}
+
+.card-premium {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-premium:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  transform: translateY(-3px);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.btn-gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #d97706 0%,
+    #f59e0b 35%,
+    #fbbf24 50%,
+    #f59e0b 65%,
+    #d97706 100%
+  );
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(217, 119, 6, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-gold-shimmer:hover {
+  box-shadow: 0 10px 24px rgba(217, 119, 6, 0.4);
+  transform: translateY(-1px);
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
