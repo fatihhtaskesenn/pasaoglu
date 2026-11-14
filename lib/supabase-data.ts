@@ -29,6 +29,7 @@ export interface ProductSetMachine {
   code: string;
   title: string;
   spec: string;
+  image_url?: string;
 }
 
 export interface ProductSetRecord {
@@ -470,7 +471,7 @@ export async function createProductSetInSupabase(input: {
   title: string;
   subtitle?: string;
   description?: string;
-  image_url: string;
+  image_url?: string;
   original_price: number;
   campaign_price: number;
   included_products: ProductSetMachine[];
@@ -481,15 +482,20 @@ export async function createProductSetInSupabase(input: {
     return { setItem: null, error: 'Supabase bağlantısı henüz yapılandırılmamış (.env.local).' };
   }
 
+  const fallbackImage =
+    input.image_url?.trim() ||
+    input.included_products.find((m) => m.image_url?.trim())?.image_url?.trim() ||
+    '';
+
   const slug = `${slugifyTurkish(input.title)}-${Date.now().toString().slice(-4)}`;
   const { data, error } = await supabase
     .from('product_sets')
     .insert({
       slug,
       title: input.title.trim(),
-      subtitle: input.subtitle?.trim() || `${input.included_products.length || 5} Makine`,
+      subtitle: input.subtitle?.trim() || `${input.included_products.length || 1} Makine`,
       description: input.description?.trim() || '',
-      image_url: input.image_url.trim(),
+      image_url: fallbackImage,
       original_price: input.original_price,
       campaign_price: input.campaign_price,
       included_products: input.included_products,
@@ -511,7 +517,7 @@ export async function updateProductSetInSupabase(
     title: string;
     subtitle?: string;
     description?: string;
-    image_url: string;
+    image_url?: string;
     original_price: number;
     campaign_price: number;
     included_products: ProductSetMachine[];
@@ -521,13 +527,18 @@ export async function updateProductSetInSupabase(
   const supabase = getSupabaseClient();
   if (!supabase) return { error: 'Supabase bağlantısı yok.' };
 
+  const fallbackImage =
+    input.image_url?.trim() ||
+    input.included_products.find((m) => m.image_url?.trim())?.image_url?.trim() ||
+    '';
+
   const { error } = await supabase
     .from('product_sets')
     .update({
       title: input.title.trim(),
-      subtitle: input.subtitle?.trim() || `${input.included_products.length || 5} Makine`,
+      subtitle: input.subtitle?.trim() || `${input.included_products.length || 1} Makine`,
       description: input.description?.trim() || '',
-      image_url: input.image_url.trim(),
+      image_url: fallbackImage,
       original_price: input.original_price,
       campaign_price: input.campaign_price,
       included_products: input.included_products,

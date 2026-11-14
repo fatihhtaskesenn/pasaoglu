@@ -117,6 +117,8 @@ export default function AdminCatalogPage() {
   const [machineCode, setMachineCode] = useState('');
   const [machineTitle, setMachineTitle] = useState('');
   const [machineSpec, setMachineSpec] = useState('');
+  const [machineImageUrl, setMachineImageUrl] = useState('');
+  const [uploadingMachineImg, setUploadingMachineImg] = useState(false);
   const [uploadingSetImg, setUploadingSetImg] = useState(false);
   const [savingSet, setSavingSet] = useState(false);
 
@@ -408,8 +410,8 @@ export default function AdminCatalogPage() {
   const resetSetForm = () => {
     setEditingSetId(null);
     setSetTitle('');
-    setSetBadge('5’Lİ ÇEYİZ SETİ');
-    setSetSubtitle('5 Makine');
+    setSetBadge('SET FIRSATI');
+    setSetSubtitle('');
     setSetOriginalPrice('');
     setSetCampaignPrice('');
     setSetImageUrl('');
@@ -418,6 +420,7 @@ export default function AdminCatalogPage() {
     setMachineCode('');
     setMachineTitle('');
     setMachineSpec('');
+    setMachineImageUrl('');
   };
 
   const handleStartEditSet = (item: ProductSetRecord) => {
@@ -430,6 +433,10 @@ export default function AdminCatalogPage() {
     setSetImageUrl(item.image_url || '');
     setSetDesc(item.description || '');
     setSetMachines(item.included_products || []);
+    setMachineCode('');
+    setMachineTitle('');
+    setMachineSpec('');
+    setMachineImageUrl('');
     setStatusMessage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -452,36 +459,88 @@ export default function AdminCatalogPage() {
     e.target.value = '';
   };
 
+  const handleMachineFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMachineImg(true);
+    const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'sets');
+    if (error || !url) {
+      setStatusMessage({ type: 'error', text: error || 'Makine görseli yüklenemedi.' });
+    } else {
+      setMachineImageUrl(url);
+      setStatusMessage({
+        type: 'success',
+        text: formatUploadMessage('Makine görseli', originalSize, optimizedSize),
+      });
+    }
+    setUploadingMachineImg(false);
+    e.target.value = '';
+  };
+
+  const syncSetCountLabels = (nextCount: number) => {
+    if (nextCount > 0) {
+      setSetSubtitle(`${nextCount} Makine`);
+      if (!setBadge.trim() || setBadge === 'SET FIRSATI' || /^\d+['’]?L[İI]/i.test(setBadge.trim())) {
+        setSetBadge(`${nextCount}’Lİ ÇEYİZ SETİ`);
+      }
+    } else {
+      setSetSubtitle('');
+    }
+  };
+
   const addMachineToSet = () => {
-    if (!machineTitle.trim()) return;
-    setSetMachines((prev) => [
-      ...prev,
+    if (!machineTitle.trim()) {
+      setStatusMessage({ type: 'error', text: 'Lütfen makine adını yazın.' });
+      return;
+    }
+    if (!machineImageUrl.trim()) {
+      setStatusMessage({ type: 'error', text: 'Lütfen bu makine için bir görsel seçin veya URL girin.' });
+      return;
+    }
+    const next = [
+      ...setMachines,
       {
         code: machineCode.trim().toUpperCase(),
         title: machineTitle.trim(),
         spec: machineSpec.trim(),
+        image_url: machineImageUrl.trim(),
       },
-    ]);
+    ];
+    setSetMachines(next);
+    syncSetCountLabels(next.length);
     setMachineCode('');
     setMachineTitle('');
     setMachineSpec('');
+    setMachineImageUrl('');
+    setStatusMessage(null);
   };
 
   const removeMachineFromSet = (idx: number) => {
-    setSetMachines((prev) => prev.filter((_, i) => i !== idx));
+    const next = setMachines.filter((_, i) => i !== idx);
+    setSetMachines(next);
+    syncSetCountLabels(next.length);
   };
 
   const handleSaveSet = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!setTitle.trim() || !setImageUrl.trim()) return;
+    if (!setTitle.trim()) return;
+    const derivedImage =
+      setImageUrl.trim() || setMachines.find((m) => m.image_url?.trim())?.image_url?.trim() || '';
+    if (setMachines.length === 0 && !derivedImage) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Lütfen sete en az 1 makine (görseliyle birlikte) ekleyin.',
+      });
+      return;
+    }
     setSavingSet(true);
     setStatusMessage(null);
 
     const payload = {
       title: setTitle,
-      subtitle: setSubtitle || `${setMachines.length || 5} Makine`,
+      subtitle: setSubtitle.trim() || `${setMachines.length || 1} Makine`,
       description: setDesc,
-      image_url: setImageUrl,
+      image_url: derivedImage,
       original_price: Number(setOriginalPrice) || Number(setCampaignPrice) || 0,
       campaign_price: Number(setCampaignPrice) || 0,
       included_products: setMachines,
@@ -1557,7 +1616,7 @@ export default function AdminCatalogPage() {
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 mb-1">
-                  Set Fiyatı (₺) *
+                  Set Toplu Fiyatı (₺) *
                 </label>
                 <input
                   type="number"
@@ -1571,17 +1630,132 @@ export default function AdminCatalogPage() {
               </div>
             </div>
 
+            {/* Set İçindeki Makineler (Her makine ayrı görselli) */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  Set İçindeki Makineler ({setMachines.length} Adet)
+                </p>
+                <span className="text-[10px] font-semibold text-[#005596] bg-[#005596]/10 px-2 py-0.5 rounded-full">
+                  Eklenen makine kadar set sayısı oluşur
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input
+                  type="text"
+                  value={machineCode}
+                  onChange={(e) => setMachineCode(e.target.value)}
+                  placeholder="Kod (BD3056WFDN)"
+                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono uppercase bg-white"
+                />
+                <input
+                  type="text"
+                  value={machineTitle}
+                  onChange={(e) => setMachineTitle(e.target.value)}
+                  placeholder="Makine Adı * (Buzdolabı)"
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                />
+              </div>
+              <input
+                type="text"
+                value={machineSpec}
+                onChange={(e) => setMachineSpec(e.target.value)}
+                placeholder="Kısa özellik (Örn: 508 Litre • No-Frost)"
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+              />
+              <div className="flex items-center gap-2">
+                {machineImageUrl && (
+                  <div className="w-9 h-9 rounded-lg border border-slate-200 bg-white p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={machineImageUrl}
+                      alt="Önizleme"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                )}
+                <input
+                  type="text"
+                  value={machineImageUrl}
+                  onChange={(e) => setMachineImageUrl(e.target.value)}
+                  placeholder="Makine Görseli * (URL veya Seç)"
+                  className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                />
+                <label className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
+                  <Upload size={12} />
+                  {uploadingMachineImg ? '...' : 'Seç'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleMachineFileUpload}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={addMachineToSet}
+                  className="px-3 py-1.5 rounded-lg bg-[#005596] hover:bg-[#004478] text-white text-xs font-bold cursor-pointer shrink-0"
+                >
+                  + Ekle
+                </button>
+              </div>
+
+              {setMachines.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  {setMachines.map((m, idx) => (
+                    <div
+                      key={`${m.code}-${idx}`}
+                      className="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-5 h-5 rounded-md bg-[#005596] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        {m.image_url && (
+                          <div className="w-9 h-9 rounded-md border border-slate-100 bg-slate-50 p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={m.image_url}
+                              alt={m.title}
+                              className="max-w-full max-h-full object-contain"
+                            />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900">{m.title}</span>
+                          {m.code && (
+                            <span className="ml-1.5 font-mono text-[10px] text-slate-500">
+                              ({m.code})
+                            </span>
+                          )}
+                          {m.spec && (
+                            <p className="text-[11px] text-slate-500 truncate">{m.spec}</p>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeMachineFromSet(idx)}
+                        className="text-slate-400 hover:text-rose-600 cursor-pointer shrink-0"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="block text-[11px] font-bold text-slate-500 mb-1">
-                Set Görseli *
+                Opsiyonel Tek Kapak Görseli (Boş bırakılırsa makine görselleri birleştirilir)
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  required
                   value={setImageUrl}
                   onChange={(e) => setSetImageUrl(e.target.value)}
-                  placeholder="URL veya bilgisayarınızdan seçin"
+                  placeholder="İsteğe bağlı özel set fotoğrafı URL"
                   className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
                 />
                 <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
@@ -1610,81 +1784,6 @@ export default function AdminCatalogPage() {
               />
             </div>
 
-            {/* Set İçindeki Makineler */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2.5">
-              <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                Set İçindeki Makineler ({setMachines.length})
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <input
-                  type="text"
-                  value={machineCode}
-                  onChange={(e) => setMachineCode(e.target.value)}
-                  placeholder="Kod (BD3056WFDN)"
-                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono uppercase bg-white"
-                />
-                <input
-                  type="text"
-                  value={machineTitle}
-                  onChange={(e) => setMachineTitle(e.target.value)}
-                  placeholder="Makine Adı (Buzdolabı)"
-                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
-                />
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={machineSpec}
-                  onChange={(e) => setMachineSpec(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addMachineToSet();
-                    }
-                  }}
-                  placeholder="Kısa özellik (Örn: 508 Litre • No-Frost)"
-                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
-                />
-                <button
-                  type="button"
-                  onClick={addMachineToSet}
-                  className="px-3 py-1.5 rounded-lg bg-[#005596] text-white text-xs font-bold cursor-pointer shrink-0"
-                >
-                  + Makine Ekle
-                </button>
-              </div>
-
-              {setMachines.length > 0 && (
-                <div className="space-y-1.5 pt-1">
-                  {setMachines.map((m, idx) => (
-                    <div
-                      key={`${m.code}-${idx}`}
-                      className="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs"
-                    >
-                      <div className="min-w-0">
-                        <span className="font-bold text-slate-900">{m.title}</span>
-                        {m.code && (
-                          <span className="ml-1.5 font-mono text-[10px] text-slate-500">
-                            ({m.code})
-                          </span>
-                        )}
-                        {m.spec && (
-                          <p className="text-[11px] text-slate-500 truncate">{m.spec}</p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeMachineFromSet(idx)}
-                        className="text-slate-400 hover:text-rose-600 cursor-pointer shrink-0"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             <button
               type="submit"
               disabled={savingSet || !isSupabaseConfigured}
@@ -1709,13 +1808,29 @@ export default function AdminCatalogPage() {
                     key={setItem.id}
                     className="border border-slate-200 rounded-xl overflow-hidden bg-white flex flex-col"
                   >
-                    <div className="relative h-44 bg-slate-50 p-2 flex items-center justify-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={setItem.image_url}
-                        alt={setItem.title}
-                        className="max-h-full max-w-full object-contain"
-                      />
+                    <div className="relative h-44 bg-gradient-to-b from-white to-slate-50 p-3 flex items-end justify-center overflow-hidden">
+                      {setItem.included_products.some((m) => m.image_url) ? (
+                        <div className="flex items-end justify-center w-full h-full">
+                          {setItem.included_products
+                            .filter((m) => m.image_url)
+                            .map((m, idx) => (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                key={`${m.code}-${idx}`}
+                                src={m.image_url}
+                                alt={m.title}
+                                className="h-32 sm:h-36 w-auto min-w-0 flex-1 object-contain mix-blend-multiply -mx-1 drop-shadow-sm"
+                              />
+                            ))}
+                        </div>
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={setItem.image_url}
+                          alt={setItem.title}
+                          className="max-h-full max-w-full object-contain mix-blend-multiply"
+                        />
+                      )}
                     </div>
                     <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
                       <div>
