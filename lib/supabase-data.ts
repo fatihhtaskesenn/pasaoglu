@@ -7,12 +7,30 @@ export interface CampaignRecord {
   title: string;
   subtitle: string;
   image_url: string;
+  images?: string[];
   target_url: string;
   badge_text: string;
   price_label: string;
   display_order: number;
   is_active: boolean;
   created_at?: string;
+}
+
+export function parseCampaignImages(rawImageUrl?: string | null): string[] {
+  if (!rawImageUrl) return [];
+  const trimmed = rawImageUrl.trim();
+  if (!trimmed) return [];
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+      }
+    } catch {
+      return [trimmed];
+    }
+  }
+  return [trimmed];
 }
 
 export interface HomepageSlideRecord {
@@ -324,13 +342,21 @@ export async function fetchCampaignsFromSupabase(): Promise<CampaignRecord[]> {
     .order('display_order', { ascending: true });
 
   if (error || !data) return [];
-  return data as CampaignRecord[];
+  return (data as CampaignRecord[]).map((row) => {
+    const imgs = parseCampaignImages(row.image_url);
+    return {
+      ...row,
+      image_url: imgs[0] || row.image_url,
+      images: imgs,
+    };
+  });
 }
 
 export async function createCampaignInSupabase(input: {
   title: string;
   subtitle?: string;
   image_url: string;
+  secondary_image_url?: string;
   target_url?: string;
   badge_text?: string;
   price_label?: string;
@@ -340,12 +366,16 @@ export async function createCampaignInSupabase(input: {
     return { campaign: null, error: 'Supabase bağlantısı henüz yapılandırılmamış (.env.local).' };
   }
 
+  const primary = input.image_url.trim();
+  const secondary = input.secondary_image_url?.trim();
+  const storedImageValue = secondary ? JSON.stringify([primary, secondary]) : primary;
+
   const { data, error } = await supabase
     .from('campaigns')
     .insert({
       title: input.title.trim(),
       subtitle: input.subtitle?.trim() || '',
-      image_url: input.image_url,
+      image_url: storedImageValue,
       target_url: input.target_url?.trim() || '/setler',
       badge_text: input.badge_text?.trim() || 'KAMPANYA',
       price_label: input.price_label?.trim() || '',
@@ -357,7 +387,15 @@ export async function createCampaignInSupabase(input: {
   if (error || !data) {
     return { campaign: null, error: error?.message || 'Kampanya eklenemedi.' };
   }
-  return { campaign: data as CampaignRecord, error: null };
+  const imgs = parseCampaignImages((data as CampaignRecord).image_url);
+  return {
+    campaign: {
+      ...(data as CampaignRecord),
+      image_url: imgs[0] || primary,
+      images: imgs,
+    },
+    error: null,
+  };
 }
 
 export async function deleteCampaignInSupabase(id: string): Promise<{ error: string | null }> {

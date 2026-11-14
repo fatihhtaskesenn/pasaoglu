@@ -94,7 +94,9 @@ export default function AdminCatalogPage() {
   const [campTitle, setCampTitle] = useState('');
   const [campPriceLabel, setCampPriceLabel] = useState('');
   const [campImageUrl, setCampImageUrl] = useState('');
+  const [campImageUrl2, setCampImageUrl2] = useState('');
   const [uploadingCampImg, setUploadingCampImg] = useState(false);
+  const [uploadingCampImg2, setUploadingCampImg2] = useState(false);
   const [savingCampaign, setSavingCampaign] = useState(false);
 
   // Ana Sayfa Hero Görselleri Formu
@@ -580,20 +582,60 @@ export default function AdminCatalogPage() {
   };
 
   const handleCampaignFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []).slice(0, 2);
+    if (files.length === 0) return;
     setUploadingCampImg(true);
-    const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'campaigns');
-    if (error || !url) {
-      setStatusMessage({ type: 'error', text: error || 'Kampanya görseli yüklenemedi.' });
-    } else {
-      setCampImageUrl(url);
+    if (files.length === 2) {
+      setUploadingCampImg2(true);
+    }
+
+    const results = await Promise.all(files.map((file) => uploadMediaFile(file, 'campaigns')));
+    const first = results[0];
+    const second = results[1];
+
+    if (first?.url) {
+      setCampImageUrl(first.url);
+    }
+    if (second?.url) {
+      setCampImageUrl2(second.url);
+    }
+
+    const failed = results.find((r) => r.error || !r.url);
+    if (failed) {
+      setStatusMessage({ type: 'error', text: failed.error || 'Kampanya görseli yüklenemedi.' });
+    } else if (files.length === 2 && first?.url && second?.url) {
       setStatusMessage({
         type: 'success',
-        text: formatUploadMessage('Kampanya afişi', originalSize, optimizedSize),
+        text: '2 kampanya afişi aynı anda yüklendi ve optimize edildi.',
+      });
+    } else if (first) {
+      setStatusMessage({
+        type: 'success',
+        text: formatUploadMessage('Kampanya afişi', first.originalSize, first.optimizedSize),
       });
     }
+
     setUploadingCampImg(false);
+    setUploadingCampImg2(false);
+    e.target.value = '';
+  };
+
+  const handleCampaignSecondFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCampImg2(true);
+    const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'campaigns');
+    if (error || !url) {
+      setStatusMessage({ type: 'error', text: error || '2. kampanya görseli yüklenemedi.' });
+    } else {
+      setCampImageUrl2(url);
+      setStatusMessage({
+        type: 'success',
+        text: formatUploadMessage('2. Kampanya afişi', originalSize, optimizedSize),
+      });
+    }
+    setUploadingCampImg2(false);
+    e.target.value = '';
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -721,6 +763,7 @@ export default function AdminCatalogPage() {
       title: campTitle,
       price_label: campPriceLabel,
       image_url: campImageUrl.trim(),
+      secondary_image_url: campImageUrl2.trim() || undefined,
     });
 
     if (error) {
@@ -730,6 +773,7 @@ export default function AdminCatalogPage() {
       setCampTitle('');
       setCampPriceLabel('');
       setCampImageUrl('');
+      setCampImageUrl2('');
       await loadAll();
     }
     setSavingCampaign(false);
@@ -1459,15 +1503,25 @@ export default function AdminCatalogPage() {
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 mb-1">Afiş Görseli *</label>
-              <div className="flex gap-2">
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                1. Afiş Görseli * (Aynı anda 2 görsel seçebilirsiniz)
+              </label>
+              <div className="flex items-center gap-2">
+                {campImageUrl && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={campImageUrl}
+                    alt="1. Afiş"
+                    className="w-9 h-12 rounded-lg object-cover border border-slate-200 shrink-0"
+                  />
+                )}
                 <input
                   type="text"
                   required
                   value={campImageUrl}
                   onChange={(e) => setCampImageUrl(e.target.value)}
-                  placeholder="URL veya yükleyin"
-                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                  placeholder="URL veya 1-2 görsel seçin"
+                  className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
                 />
                 <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
                   <Upload size={13} />
@@ -1475,10 +1529,53 @@ export default function AdminCatalogPage() {
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleCampaignFileUpload}
                     className="hidden"
                   />
                 </label>
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                2. Afiş Görseli (Opsiyonel)
+              </label>
+              <div className="flex items-center gap-2">
+                {campImageUrl2 && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={campImageUrl2}
+                    alt="2. Afiş"
+                    className="w-9 h-12 rounded-lg object-cover border border-slate-200 shrink-0"
+                  />
+                )}
+                <input
+                  type="text"
+                  value={campImageUrl2}
+                  onChange={(e) => setCampImageUrl2(e.target.value)}
+                  placeholder="İsteğe bağlı 2. görsel URL"
+                  className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
+                  <Upload size={13} />
+                  {uploadingCampImg2 ? '...' : 'Seç'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCampaignSecondFileUpload}
+                    className="hidden"
+                  />
+                </label>
+                {campImageUrl2 && (
+                  <button
+                    type="button"
+                    onClick={() => setCampImageUrl2('')}
+                    className="p-2 text-slate-400 hover:text-rose-600 cursor-pointer shrink-0"
+                    title="2. görseli kaldır"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
               </div>
             </div>
             <button
@@ -1498,18 +1595,38 @@ export default function AdminCatalogPage() {
               <p className="text-sm text-slate-400 py-8 text-center">Henüz kampanya yok.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {campaigns.map((camp) => (
-                  <div
-                    key={camp.id}
-                    className="border border-slate-200 rounded-xl overflow-hidden bg-white flex flex-col"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={camp.image_url}
-                      alt={camp.title}
-                      className="w-full h-44 object-cover"
-                    />
-                    <div className="p-3 flex items-center justify-between gap-2">
+                {campaigns.map((camp) => {
+                  const campImgs =
+                    camp.images && camp.images.length > 0 ? camp.images : [camp.image_url];
+                  return (
+                    <div
+                      key={camp.id}
+                      className="border border-slate-200 rounded-xl overflow-hidden bg-white flex flex-col"
+                    >
+                      {campImgs.length > 1 ? (
+                        <div className="relative grid grid-cols-2 gap-0.5 h-44 bg-slate-100">
+                          {campImgs.slice(0, 2).map((imgUrl, idx) => (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              key={idx}
+                              src={imgUrl}
+                              alt={`${camp.title} (${idx + 1})`}
+                              className="w-full h-44 object-cover"
+                            />
+                          ))}
+                          <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-slate-900/75 text-white text-[10px] font-bold">
+                            2 Görsel
+                          </span>
+                        </div>
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={campImgs[0]}
+                          alt={camp.title}
+                          className="w-full h-44 object-cover"
+                        />
+                      )}
+                      <div className="p-3 flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-900 truncate">{camp.title}</p>
                         {camp.price_label && (
@@ -1523,9 +1640,10 @@ export default function AdminCatalogPage() {
                       >
                         <Trash2 size={15} />
                       </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

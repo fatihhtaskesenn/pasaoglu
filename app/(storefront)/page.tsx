@@ -186,11 +186,74 @@ const applianceCategories: ApplianceCategory[] = [
   },
 ];
 
+function CampaignPosterCard({
+  post,
+}: {
+  post: InstagramPostItem & { images?: string[] };
+}) {
+  const images =
+    post.images && post.images.length > 0 ? post.images : [post.image];
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % images.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div
+      onClick={() => {
+        if (images.length > 1) {
+          setActiveIdx((prev) => (prev + 1) % images.length);
+        }
+      }}
+      className={`relative aspect-[54/77] rounded-lg sm:rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shadow-sm ${
+        images.length > 1 ? 'cursor-pointer' : ''
+      }`}
+    >
+      {images.map((imgSrc, idx) => (
+        <Image
+          key={`${post.id}-${idx}`}
+          src={imgSrc}
+          alt={post.title}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+          className={`object-cover transition-opacity duration-500 ${
+            idx === activeIdx ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+          unoptimized={imgSrc.startsWith('http')}
+        />
+      ))}
+      {images.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-950/60 backdrop-blur-xs">
+          {images.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              aria-label={`${idx + 1}. görsel`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveIdx(idx);
+              }}
+              className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                idx === activeIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [igPosts, setIgPosts] = useState<InstagramPostItem[]>([]);
+  const [igPosts, setIgPosts] = useState<(InstagramPostItem & { images?: string[] })[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
 
   useEffect(() => {
@@ -213,6 +276,7 @@ export default function HomePage() {
           liveCampaigns.slice(0, 4).map((c) => ({
             id: c.id,
             image: c.image_url,
+            images: c.images && c.images.length > 0 ? c.images : [c.image_url],
             title: c.title,
             permalink: c.target_url || '/setler',
           }))
@@ -328,19 +392,7 @@ export default function HomePage() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
                 {igPosts.slice(0, 4).map((post) => (
-                  <div
-                    key={post.id}
-                    className="relative aspect-[54/77] rounded-lg sm:rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shadow-sm"
-                  >
-                    <Image
-                      src={post.image}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover"
-                      unoptimized={post.image.startsWith('http')}
-                    />
-                  </div>
+                  <CampaignPosterCard key={post.id} post={post} />
                 ))}
               </div>
             )}
