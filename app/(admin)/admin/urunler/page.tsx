@@ -1810,18 +1810,26 @@ export default function AdminCatalogPage() {
                   >
                     <div className="relative h-44 bg-gradient-to-b from-white to-slate-50 p-3 flex items-end justify-center overflow-hidden">
                       {setItem.included_products.some((m) => m.image_url) ? (
-                        <div className="flex items-end justify-center w-full h-full">
+                        <div className="flex items-end justify-center gap-0.5 w-full h-full">
                           {setItem.included_products
                             .filter((m) => m.image_url)
-                            .map((m, idx) => (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                key={`${m.code}-${idx}`}
-                                src={m.image_url}
-                                alt={m.title}
-                                className="h-32 sm:h-36 w-auto min-w-0 flex-1 object-contain mix-blend-multiply -mx-1 drop-shadow-sm"
-                              />
-                            ))}
+                            .map((m, idx) => {
+                              const text = `${m.title} ${m.code} ${m.spec}`.toLocaleLowerCase('tr-TR');
+                              const isTall =
+                                /buzdolab|gard[ıi]rop|kombi|no-?frost|dondurucu/.test(text) &&
+                                !/sand[ıi]k|yatay/.test(text);
+                              const isTv = /televizyon|\btv\b|smart|uhd|qled|oled/.test(text);
+                              const hClass = isTall ? 'h-36' : isTv ? 'h-18' : 'h-22';
+                              return (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  key={`${m.code}-${idx}`}
+                                  src={m.image_url}
+                                  alt={m.title}
+                                  className={`${hClass} w-auto max-w-full min-w-0 shrink object-contain mix-blend-multiply drop-shadow-sm`}
+                                />
+                              );
+                            })}
                         </div>
                       ) : (
                         /* eslint-disable-next-line @next/next/no-img-element */

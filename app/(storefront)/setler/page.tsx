@@ -18,9 +18,41 @@ import { useCartStore } from '@/store';
 import { formatPrice } from '@/lib/utils';
 import {
   fetchProductSetsFromSupabase,
+  type ProductSetMachine,
   type ProductSetRecord,
 } from '@/lib/supabase-data';
 import { Product } from '@/types';
+
+/**
+ * Beyaz eşyaların gerçek fiziksel boyut oranlarına göre stüdyo vitrini yükseklik sınıfını döner.
+ * Örn: Buzdolabı (~190cm) en uzun, çamaşır/bulaşık (~85cm) orta, TV/küçük ev aletleri daha kompakt.
+ */
+function getMachineStudioHeightClass(machine: ProductSetMachine, totalCount: number): string {
+  const text = `${machine.title} ${machine.code} ${machine.spec}`.toLocaleLowerCase('tr-TR');
+  const isCompactSet = totalCount >= 5;
+
+  const isTall =
+    /buzdolab|gard[ıi]rop|kombi|no-?frost|dondurucu/.test(text) && !/sand[ıi]k|yatay/.test(text);
+  const isTv = /televizyon|\btv\b|smart|uhd|qled|oled/.test(text);
+  const isSmall = /ocak|davlumbaz|mikrodalga|s[üu]p[üu]rge|[çc]ay|kahve|tost|blender|[üu]t[üu]/.test(
+    text
+  );
+
+  if (totalCount <= 1) {
+    return 'h-56 sm:h-80';
+  }
+  if (isTall) {
+    return isCompactSet ? 'h-48 sm:h-68' : 'h-52 sm:h-76';
+  }
+  if (isTv) {
+    return isCompactSet ? 'h-22 sm:h-32' : 'h-24 sm:h-36';
+  }
+  if (isSmall) {
+    return isCompactSet ? 'h-20 sm:h-28' : 'h-22 sm:h-32';
+  }
+  // Çamaşır, kurutma, bulaşık makinesi, fırın (standart ~85cm tezgah altı/boyu)
+  return isCompactSet ? 'h-28 sm:h-38' : 'h-30 sm:h-42';
+}
 
 export default function SetlerPage() {
   const [sets, setSets] = useState<ProductSetRecord[]>([]);
@@ -145,16 +177,6 @@ export default function SetlerPage() {
             const machineImages = setItem.included_products.filter((m) =>
               Boolean(m.image_url?.trim())
             );
-            const lineupHeightClass =
-              machineImages.length <= 1
-                ? 'h-52 sm:h-72'
-                : machineImages.length === 2
-                ? 'h-44 sm:h-64'
-                : machineImages.length === 3
-                ? 'h-36 sm:h-56'
-                : machineImages.length === 4
-                ? 'h-32 sm:h-48'
-                : 'h-28 sm:h-44';
 
             return (
               <div
@@ -162,65 +184,77 @@ export default function SetlerPage() {
                 className="bg-white border border-slate-200/90 hover:border-[#005596]/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs hover:shadow-xl transition-all"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-12">
-                  {/* Sol: Tek Fotoğraf Görünümlü Birleşik Stüdyo Sahnesi */}
-                  <div className="lg:col-span-5 relative min-h-[240px] sm:min-h-[390px] bg-gradient-to-b from-white via-white to-slate-100/80 border-b lg:border-b-0 lg:border-r border-slate-100 overflow-hidden flex flex-col items-center justify-end px-4 pt-12 pb-6 sm:px-6 sm:pt-14 sm:pb-8">
+                  {/* Sol: Tek Fotoğraf Görünümlü Orantılı Stüdyo Sahnesi */}
+                  <div className="lg:col-span-5 relative min-h-[250px] sm:min-h-[390px] bg-gradient-to-b from-white via-white to-slate-100/80 border-b lg:border-b-0 lg:border-r border-slate-100 overflow-hidden flex flex-col items-center justify-center px-3 pt-12 pb-6 sm:px-5 sm:pt-14 sm:pb-8">
                     {machineImages.length > 0 ? (
-                      <div className="relative w-full flex-1 flex flex-col items-center justify-end">
+                      <div className="relative w-full flex flex-col items-center justify-center">
                         {machineImages.length <= 5 ? (
-                          <div className="relative z-10 flex items-end justify-center w-full max-w-full">
-                            {machineImages.map((m, idx) => (
-                              <button
-                                key={`${m.code}-${idx}`}
-                                type="button"
-                                onClick={() =>
-                                  setPreviewImage({
-                                    src: m.image_url!,
-                                    name: m.code ? `${m.title} (${m.code})` : m.title,
-                                  })
-                                }
-                                title={m.code ? `${m.title} (${m.code})` : m.title}
-                                className="group/machine relative flex-1 min-w-0 flex flex-col items-center justify-end -mx-1 sm:-mx-1.5 cursor-pointer focus:outline-none"
-                              >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={m.image_url}
-                                  alt={m.title}
-                                  loading="lazy"
-                                  className={`${lineupHeightClass} w-full object-contain mix-blend-multiply drop-shadow-[0_12px_16px_rgba(15,23,42,0.14)] transition-transform duration-300 ease-out group-hover/machine:scale-105 group-hover/machine:-translate-y-1`}
-                                />
-                                <span className="pointer-events-none opacity-0 group-hover/machine:opacity-100 transition-opacity absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md bg-slate-900/85 text-white text-[10px] font-semibold shadow-sm z-20">
-                                  {m.title}
-                                </span>
-                              </button>
-                            ))}
+                          <div className="relative z-10 flex items-end justify-center gap-0.5 sm:gap-1 w-full max-w-full">
+                            {machineImages.map((m, idx) => {
+                              const heightClass = getMachineStudioHeightClass(
+                                m,
+                                machineImages.length
+                              );
+                              return (
+                                <button
+                                  key={`${m.code}-${idx}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setPreviewImage({
+                                      src: m.image_url!,
+                                      name: m.code ? `${m.title} (${m.code})` : m.title,
+                                    })
+                                  }
+                                  title={m.code ? `${m.title} (${m.code})` : m.title}
+                                  className="group/machine relative min-w-0 shrink flex flex-col items-center justify-end cursor-pointer focus:outline-none"
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={m.image_url}
+                                    alt={m.title}
+                                    loading="lazy"
+                                    className={`${heightClass} w-auto max-w-full object-contain mix-blend-multiply drop-shadow-[0_12px_16px_rgba(15,23,42,0.14)] transition-transform duration-300 ease-out group-hover/machine:scale-105 group-hover/machine:-translate-y-1`}
+                                  />
+                                  <span className="pointer-events-none opacity-0 group-hover/machine:opacity-100 transition-opacity absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md bg-slate-900/85 text-white text-[10px] font-semibold shadow-sm z-20">
+                                    {m.title}
+                                  </span>
+                                </button>
+                              );
+                            })}
                           </div>
                         ) : (
-                          <div className="relative z-10 grid grid-cols-3 gap-x-1 gap-y-2 items-end justify-items-center w-full">
-                            {machineImages.map((m, idx) => (
-                              <button
-                                key={`${m.code}-${idx}`}
-                                type="button"
-                                onClick={() =>
-                                  setPreviewImage({
-                                    src: m.image_url!,
-                                    name: m.code ? `${m.title} (${m.code})` : m.title,
-                                  })
-                                }
-                                title={m.code ? `${m.title} (${m.code})` : m.title}
-                                className="group/machine relative w-full flex flex-col items-center justify-end cursor-pointer focus:outline-none"
-                              >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={m.image_url}
-                                  alt={m.title}
-                                  loading="lazy"
-                                  className="h-24 sm:h-36 w-full object-contain mix-blend-multiply drop-shadow-[0_10px_14px_rgba(15,23,42,0.13)] transition-transform duration-300 ease-out group-hover/machine:scale-105 group-hover/machine:-translate-y-1"
-                                />
-                                <span className="pointer-events-none opacity-0 group-hover/machine:opacity-100 transition-opacity absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md bg-slate-900/85 text-white text-[10px] font-semibold shadow-sm z-20">
-                                  {m.title}
-                                </span>
-                              </button>
-                            ))}
+                          <div className="relative z-10 grid grid-cols-3 gap-x-1.5 gap-y-2 items-end justify-items-center w-full">
+                            {machineImages.map((m, idx) => {
+                              const heightClass = getMachineStudioHeightClass(
+                                m,
+                                machineImages.length
+                              );
+                              return (
+                                <button
+                                  key={`${m.code}-${idx}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setPreviewImage({
+                                      src: m.image_url!,
+                                      name: m.code ? `${m.title} (${m.code})` : m.title,
+                                    })
+                                  }
+                                  title={m.code ? `${m.title} (${m.code})` : m.title}
+                                  className="group/machine relative w-full flex flex-col items-center justify-end cursor-pointer focus:outline-none"
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={m.image_url}
+                                    alt={m.title}
+                                    loading="lazy"
+                                    className={`${heightClass} w-auto max-w-full object-contain mix-blend-multiply drop-shadow-[0_10px_14px_rgba(15,23,42,0.13)] transition-transform duration-300 ease-out group-hover/machine:scale-105 group-hover/machine:-translate-y-1`}
+                                  />
+                                  <span className="pointer-events-none opacity-0 group-hover/machine:opacity-100 transition-opacity absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md bg-slate-900/85 text-white text-[10px] font-semibold shadow-sm z-20">
+                                    {m.title}
+                                  </span>
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
                         {/* Stüdyo Zemin Gölgesi */}
