@@ -17,6 +17,7 @@ import {
   ArrowUp,
   ArrowDown,
   Image as ImageIcon,
+  Layers,
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import {
@@ -32,9 +33,15 @@ import {
   createHomepageSlideInSupabase,
   updateHomepageSlideOrderInSupabase,
   deleteHomepageSlideInSupabase,
+  fetchProductSetsFromSupabase,
+  createProductSetInSupabase,
+  updateProductSetInSupabase,
+  deleteProductSetInSupabase,
   uploadMediaFile,
   type CampaignRecord,
   type HomepageSlideRecord,
+  type ProductSetRecord,
+  type ProductSetMachine,
 } from '@/lib/supabase-data';
 import { CATEGORY_TEMPLATES } from '@/lib/category-templates';
 import { formatFileSize } from '@/lib/image-optimizer';
@@ -42,9 +49,10 @@ import { formatPrice } from '@/lib/utils';
 import type { Product } from '@/types';
 
 export default function AdminCatalogPage() {
-  const [activeTab, setActiveTab] = useState<'products' | 'campaigns' | 'homepage'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'campaigns' | 'sets' | 'homepage'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignRecord[]>([]);
+  const [productSets, setProductSets] = useState<ProductSetRecord[]>([]);
   const [homepageSlides, setHomepageSlides] = useState<HomepageSlideRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -96,16 +104,34 @@ export default function AdminCatalogPage() {
   const [uploadingSlideImg, setUploadingSlideImg] = useState(false);
   const [savingSlide, setSavingSlide] = useState(false);
 
+  // Setler Formu
+  const [editingSetId, setEditingSetId] = useState<string | null>(null);
+  const [setTitle, setSetTitle] = useState('');
+  const [setBadge, setSetBadge] = useState('5’Lİ ÇEYİZ SETİ');
+  const [setSubtitle, setSetSubtitle] = useState('5 Makine');
+  const [setOriginalPrice, setSetOriginalPrice] = useState('');
+  const [setCampaignPrice, setSetCampaignPrice] = useState('');
+  const [setImageUrl, setSetImageUrl] = useState('');
+  const [setDesc, setSetDesc] = useState('');
+  const [setMachines, setSetMachines] = useState<ProductSetMachine[]>([]);
+  const [machineCode, setMachineCode] = useState('');
+  const [machineTitle, setMachineTitle] = useState('');
+  const [machineSpec, setMachineSpec] = useState('');
+  const [uploadingSetImg, setUploadingSetImg] = useState(false);
+  const [savingSet, setSavingSet] = useState(false);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
-    const [p, c, s] = await Promise.all([
+    const [p, c, s, ps] = await Promise.all([
       fetchProductsFromSupabase(),
       fetchCampaignsFromSupabase(),
       fetchHomepageSlidesFromSupabase(),
+      fetchProductSetsFromSupabase(),
     ]);
     setProducts(p);
     setCampaigns(c);
     setHomepageSlides(s);
+    setProductSets(ps);
     setLoading(false);
   }, []);
 
@@ -378,6 +404,122 @@ export default function AdminCatalogPage() {
     }
   };
 
+  // ─── Set İşlemleri ────────────────────────────────────────
+  const resetSetForm = () => {
+    setEditingSetId(null);
+    setSetTitle('');
+    setSetBadge('5’Lİ ÇEYİZ SETİ');
+    setSetSubtitle('5 Makine');
+    setSetOriginalPrice('');
+    setSetCampaignPrice('');
+    setSetImageUrl('');
+    setSetDesc('');
+    setSetMachines([]);
+    setMachineCode('');
+    setMachineTitle('');
+    setMachineSpec('');
+  };
+
+  const handleStartEditSet = (item: ProductSetRecord) => {
+    setEditingSetId(item.id);
+    setSetTitle(item.title);
+    setSetBadge(item.badge_text || 'SET FIRSATI');
+    setSetSubtitle(item.subtitle || '');
+    setSetOriginalPrice(String(item.original_price || ''));
+    setSetCampaignPrice(String(item.campaign_price || ''));
+    setSetImageUrl(item.image_url || '');
+    setSetDesc(item.description || '');
+    setSetMachines(item.included_products || []);
+    setStatusMessage(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSetFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSetImg(true);
+    const { url, error, originalSize, optimizedSize } = await uploadMediaFile(file, 'sets');
+    if (error || !url) {
+      setStatusMessage({ type: 'error', text: error || 'Set görseli yüklenemedi.' });
+    } else {
+      setSetImageUrl(url);
+      setStatusMessage({
+        type: 'success',
+        text: formatUploadMessage('Set görseli', originalSize, optimizedSize),
+      });
+    }
+    setUploadingSetImg(false);
+    e.target.value = '';
+  };
+
+  const addMachineToSet = () => {
+    if (!machineTitle.trim()) return;
+    setSetMachines((prev) => [
+      ...prev,
+      {
+        code: machineCode.trim().toUpperCase(),
+        title: machineTitle.trim(),
+        spec: machineSpec.trim(),
+      },
+    ]);
+    setMachineCode('');
+    setMachineTitle('');
+    setMachineSpec('');
+  };
+
+  const removeMachineFromSet = (idx: number) => {
+    setSetMachines((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveSet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!setTitle.trim() || !setImageUrl.trim()) return;
+    setSavingSet(true);
+    setStatusMessage(null);
+
+    const payload = {
+      title: setTitle,
+      subtitle: setSubtitle || `${setMachines.length || 5} Makine`,
+      description: setDesc,
+      image_url: setImageUrl,
+      original_price: Number(setOriginalPrice) || Number(setCampaignPrice) || 0,
+      campaign_price: Number(setCampaignPrice) || 0,
+      included_products: setMachines,
+      badge_text: setBadge,
+    };
+
+    if (editingSetId) {
+      const { error } = await updateProductSetInSupabase(editingSetId, payload);
+      if (error) {
+        setStatusMessage({ type: 'error', text: error });
+      } else {
+        setStatusMessage({ type: 'success', text: `"${setTitle}" seti güncellendi.` });
+        resetSetForm();
+        await loadAll();
+      }
+    } else {
+      const { error } = await createProductSetInSupabase(payload);
+      if (error) {
+        setStatusMessage({ type: 'error', text: error });
+      } else {
+        setStatusMessage({ type: 'success', text: `"${setTitle}" seti yayınlandı.` });
+        resetSetForm();
+        await loadAll();
+      }
+    }
+    setSavingSet(false);
+  };
+
+  const handleDeleteSet = async (id: string, title: string) => {
+    const { error } = await deleteProductSetInSupabase(id);
+    if (error) {
+      setStatusMessage({ type: 'error', text: error });
+    } else {
+      setStatusMessage({ type: 'success', text: `"${title}" seti silindi.` });
+      await loadAll();
+    }
+  };
+
   const handleCampaignFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -588,6 +730,18 @@ export default function AdminCatalogPage() {
           >
             <Megaphone size={15} />
             Kampanyalar ({campaigns.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('sets')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'sets'
+                ? 'bg-[#005596] text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Layers size={15} />
+            Setler ({productSets.length})
           </button>
           <button
             type="button"
@@ -1310,6 +1464,285 @@ export default function AdminCatalogPage() {
                       >
                         <Trash2 size={15} />
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : activeTab === 'sets' ? (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <form
+            onSubmit={handleSaveSet}
+            className="xl:col-span-5 bg-white border border-slate-200 rounded-2xl p-5 space-y-4 h-fit"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-display font-bold text-slate-900 flex items-center gap-2">
+                {editingSetId ? (
+                  <>
+                    <Pencil size={16} className="text-amber-600" />
+                    Seti Düzenle
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} className="text-[#005596]" />
+                    Yeni Çeyiz / Avantaj Seti
+                  </>
+                )}
+              </h2>
+              {editingSetId && (
+                <button
+                  type="button"
+                  onClick={resetSetForm}
+                  className="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
+                >
+                  İptal
+                </button>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">Set Adı *</label>
+              <input
+                type="text"
+                required
+                value={setTitle}
+                onChange={(e) => setSetTitle(e.target.value)}
+                placeholder="Örn: Profilo 5’li Beyaz Konfor Çeyiz Seti"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                  Üst Rozet
+                </label>
+                <input
+                  type="text"
+                  value={setBadge}
+                  onChange={(e) => setSetBadge(e.target.value)}
+                  placeholder="5’Lİ ÇEYİZ SETİ"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                  Makine Sayısı Etiketi
+                </label>
+                <input
+                  type="text"
+                  value={setSubtitle}
+                  onChange={(e) => setSetSubtitle(e.target.value)}
+                  placeholder="5 Makine"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                  Liste Toplamı (₺)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={setOriginalPrice}
+                  onChange={(e) => setSetOriginalPrice(e.target.value)}
+                  placeholder="131990"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                  Set Fiyatı (₺) *
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  required
+                  value={setCampaignPrice}
+                  onChange={(e) => setSetCampaignPrice(e.target.value)}
+                  placeholder="114999"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                Set Görseli *
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={setImageUrl}
+                  onChange={(e) => setSetImageUrl(e.target.value)}
+                  placeholder="URL veya bilgisayarınızdan seçin"
+                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+                />
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer shrink-0">
+                  <Upload size={13} />
+                  {uploadingSetImg ? '...' : 'Seç'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleSetFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1">
+                Set Açıklaması
+              </label>
+              <textarea
+                rows={2}
+                value={setDesc}
+                onChange={(e) => setSetDesc(e.target.value)}
+                placeholder="Set içeriği ve avantajları..."
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#005596]"
+              />
+            </div>
+
+            {/* Set İçindeki Makineler */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2.5">
+              <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                Set İçindeki Makineler ({setMachines.length})
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input
+                  type="text"
+                  value={machineCode}
+                  onChange={(e) => setMachineCode(e.target.value)}
+                  placeholder="Kod (BD3056WFDN)"
+                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono uppercase bg-white"
+                />
+                <input
+                  type="text"
+                  value={machineTitle}
+                  onChange={(e) => setMachineTitle(e.target.value)}
+                  placeholder="Makine Adı (Buzdolabı)"
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                />
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={machineSpec}
+                  onChange={(e) => setMachineSpec(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addMachineToSet();
+                    }
+                  }}
+                  placeholder="Kısa özellik (Örn: 508 Litre • No-Frost)"
+                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={addMachineToSet}
+                  className="px-3 py-1.5 rounded-lg bg-[#005596] text-white text-xs font-bold cursor-pointer shrink-0"
+                >
+                  + Makine Ekle
+                </button>
+              </div>
+
+              {setMachines.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  {setMachines.map((m, idx) => (
+                    <div
+                      key={`${m.code}-${idx}`}
+                      className="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs"
+                    >
+                      <div className="min-w-0">
+                        <span className="font-bold text-slate-900">{m.title}</span>
+                        {m.code && (
+                          <span className="ml-1.5 font-mono text-[10px] text-slate-500">
+                            ({m.code})
+                          </span>
+                        )}
+                        {m.spec && (
+                          <p className="text-[11px] text-slate-500 truncate">{m.spec}</p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeMachineFromSet(idx)}
+                        className="text-slate-400 hover:text-rose-600 cursor-pointer shrink-0"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={savingSet || !isSupabaseConfigured}
+              className="w-full py-2.5 rounded-xl bg-[#005596] hover:bg-[#004478] text-white font-bold text-sm cursor-pointer disabled:opacity-50"
+            >
+              {savingSet ? 'Kaydediliyor...' : editingSetId ? 'Seti Güncelle' : 'Seti Yayınla'}
+            </button>
+          </form>
+
+          <div className="xl:col-span-7 bg-white border border-slate-200 rounded-2xl p-5">
+            <h2 className="text-base font-display font-bold text-slate-900 mb-4">
+              Yayındaki Setler ({productSets.length})
+            </h2>
+            {productSets.length === 0 ? (
+              <p className="text-sm text-slate-400 py-8 text-center">
+                Henüz eklenmiş çeyiz veya avantaj seti yok.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {productSets.map((setItem) => (
+                  <div
+                    key={setItem.id}
+                    className="border border-slate-200 rounded-xl overflow-hidden bg-white flex flex-col"
+                  >
+                    <div className="relative h-44 bg-slate-50 p-2 flex items-center justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={setItem.image_url}
+                        alt={setItem.title}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                    <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
+                      <div>
+                        <span className="text-[10px] font-bold text-[#005596] uppercase">
+                          {setItem.badge_text} • {setItem.included_products.length} Parça
+                        </span>
+                        <p className="text-xs font-bold text-slate-900 mt-0.5">{setItem.title}</p>
+                        <p className="text-sm font-extrabold font-mono text-slate-900 mt-1">
+                          {formatPrice(setItem.campaign_price)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditSet(setItem)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-[11px] font-bold cursor-pointer"
+                        >
+                          <Pencil size={12} /> Düzenle
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSet(setItem.id, setItem.title)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

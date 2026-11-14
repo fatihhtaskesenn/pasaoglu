@@ -186,33 +186,6 @@ const applianceCategories: ApplianceCategory[] = [
   },
 ];
 
-const initialInstagramPosts: InstagramPostItem[] = [
-  {
-    id: 'ig-post-1',
-    image: '/resim/kampanyalar/k1.jpeg',
-    title: 'Kampanyaya Özel 4K Ultra HD / Android Smart TV (55PA525EQG) — 45.999 ₺',
-    permalink: 'https://www.instagram.com/pasaoglu_profilo/',
-  },
-  {
-    id: 'ig-post-2',
-    image: '/resim/kampanyalar/k2.jpeg',
-    title: 'İkili Alımlara Özel 9 Kg Çamaşır & Kurutma Makinesi — 49.999 ₺',
-    permalink: 'https://www.instagram.com/pasaoglu_profilo/',
-  },
-  {
-    id: 'ig-post-3',
-    image: '/resim/kampanyalar/k3.jpeg',
-    title: 'Kampanyaya Özel A++ Enerji Verimli Buzdolabı (RF4210W) — 89.999 ₺',
-    permalink: 'https://www.instagram.com/pasaoglu_profilo/',
-  },
-  {
-    id: 'ig-post-4',
-    image: '/resim/kampanyalar/k4.jpeg',
-    title: 'Kampanyaya Özel 4 Programlı Bulaşık Makinesi (BM4210MA) — 15.999 ₺',
-    permalink: 'https://www.instagram.com/pasaoglu_profilo/',
-  },
-];
-
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -236,41 +209,18 @@ export default function HomePage() {
     fetchCampaignsFromSupabase()
       .then((liveCampaigns) => {
         if (!active) return;
-        if (liveCampaigns.length > 0) {
-          setIgPosts(
-            liveCampaigns.slice(0, 4).map((c) => ({
-              id: c.id,
-              image: c.image_url,
-              title: c.title,
-              permalink: c.target_url || '/setler',
-            }))
-          );
-          setCampaignsLoading(false);
-          return;
-        }
-
-        fetch('/api/instagram')
-          .then((res) => res.json())
-          .then((data) => {
-            if (!active) return;
-            if (Array.isArray(data?.posts) && data.posts.length > 0) {
-              setIgPosts(data.posts.slice(0, 4));
-            } else {
-              setIgPosts(initialInstagramPosts);
-            }
-          })
-          .catch(() => {
-            if (active) setIgPosts(initialInstagramPosts);
-          })
-          .finally(() => {
-            if (active) setCampaignsLoading(false);
-          });
+        setIgPosts(
+          liveCampaigns.slice(0, 4).map((c) => ({
+            id: c.id,
+            image: c.image_url,
+            title: c.title,
+            permalink: c.target_url || '/setler',
+          }))
+        );
+        setCampaignsLoading(false);
       })
       .catch(() => {
-        if (active) {
-          setIgPosts(initialInstagramPosts);
-          setCampaignsLoading(false);
-        }
+        if (active) setCampaignsLoading(false);
       });
 
     return () => {
@@ -363,8 +313,8 @@ export default function HomePage() {
           </AnimatePresence>
         </div>
 
-        {/* ─── Latest 4 Instagram Campaign Posts (Directly Under Category Strip) ─── */}
-        {!selectedCatObj && (
+        {/* ─── Latest Campaign Posts (Directly Under Category Strip) ─── */}
+        {!selectedCatObj && (campaignsLoading || igPosts.length > 0) && (
           <div className="mb-6 sm:mb-16">
             {campaignsLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">

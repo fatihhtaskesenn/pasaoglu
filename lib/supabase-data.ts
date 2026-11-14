@@ -25,6 +25,28 @@ export interface HomepageSlideRecord {
   created_at?: string;
 }
 
+export interface ProductSetMachine {
+  code: string;
+  title: string;
+  spec: string;
+}
+
+export interface ProductSetRecord {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  image_url: string;
+  original_price: number;
+  campaign_price: number;
+  included_products: ProductSetMachine[];
+  badge_text: string;
+  display_order: number;
+  is_active: boolean;
+  created_at?: string;
+}
+
 export interface ProductInput {
   name: string;
   brand: string;
@@ -57,7 +79,7 @@ function slugifyTurkish(text: string): string {
 
 export async function uploadMediaFile(
   file: File,
-  folder: 'products' | 'campaigns' | 'homepage' = 'products'
+  folder: 'products' | 'campaigns' | 'homepage' | 'sets' = 'products'
 ): Promise<{
   url: string | null;
   error: string | null;
@@ -419,6 +441,108 @@ export async function deleteHomepageSlideInSupabase(id: string): Promise<{ error
   if (!supabase) return { error: 'Supabase bağlantısı yok.' };
 
   const { error } = await supabase.from('homepage_slides').delete().eq('id', id);
+  return { error: error ? error.message : null };
+}
+
+// ─── Çeyiz & Avantaj Setleri (Supabase) ───────────────────────────────────
+
+export async function fetchProductSetsFromSupabase(): Promise<ProductSetRecord[]> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('product_sets')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return (data as ProductSetRecord[]).map((row) => ({
+    ...row,
+    original_price: Number(row.original_price || 0),
+    campaign_price: Number(row.campaign_price || 0),
+    included_products: Array.isArray(row.included_products) ? row.included_products : [],
+  }));
+}
+
+export async function createProductSetInSupabase(input: {
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image_url: string;
+  original_price: number;
+  campaign_price: number;
+  included_products: ProductSetMachine[];
+  badge_text?: string;
+}): Promise<{ setItem: ProductSetRecord | null; error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return { setItem: null, error: 'Supabase bağlantısı henüz yapılandırılmamış (.env.local).' };
+  }
+
+  const slug = `${slugifyTurkish(input.title)}-${Date.now().toString().slice(-4)}`;
+  const { data, error } = await supabase
+    .from('product_sets')
+    .insert({
+      slug,
+      title: input.title.trim(),
+      subtitle: input.subtitle?.trim() || `${input.included_products.length || 5} Makine`,
+      description: input.description?.trim() || '',
+      image_url: input.image_url.trim(),
+      original_price: input.original_price,
+      campaign_price: input.campaign_price,
+      included_products: input.included_products,
+      badge_text: input.badge_text?.trim() || 'SET FIRSATI',
+      is_active: true,
+    })
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    return { setItem: null, error: error?.message || 'Set eklenemedi.' };
+  }
+  return { setItem: data as ProductSetRecord, error: null };
+}
+
+export async function updateProductSetInSupabase(
+  id: string,
+  input: {
+    title: string;
+    subtitle?: string;
+    description?: string;
+    image_url: string;
+    original_price: number;
+    campaign_price: number;
+    included_products: ProductSetMachine[];
+    badge_text?: string;
+  }
+): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Supabase bağlantısı yok.' };
+
+  const { error } = await supabase
+    .from('product_sets')
+    .update({
+      title: input.title.trim(),
+      subtitle: input.subtitle?.trim() || `${input.included_products.length || 5} Makine`,
+      description: input.description?.trim() || '',
+      image_url: input.image_url.trim(),
+      original_price: input.original_price,
+      campaign_price: input.campaign_price,
+      included_products: input.included_products,
+      badge_text: input.badge_text?.trim() || 'SET FIRSATI',
+    })
+    .eq('id', id);
+
+  return { error: error ? error.message : null };
+}
+
+export async function deleteProductSetInSupabase(id: string): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Supabase bağlantısı yok.' };
+
+  const { error } = await supabase.from('product_sets').delete().eq('id', id);
   return { error: error ? error.message : null };
 }
 
