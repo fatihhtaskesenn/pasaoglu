@@ -67,24 +67,24 @@ export function Navbar() {
       <header
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out bg-[#005596] border-b border-[#00477d] shadow-md',
-          scrolled ? 'h-20 shadow-lg' : 'h-28'
+          scrolled ? 'h-16 sm:h-20 shadow-lg' : 'h-16 sm:h-28'
         )}
       >
-        <nav className="max-w-screen-xl mx-auto px-6 h-full flex items-center justify-between gap-8 transition-all duration-300">
+        <nav className="max-w-screen-xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2 sm:gap-8 transition-all duration-300">
           {/* Brand Logo + Sol Köşede 43. Yıl Altın Logosu */}
-          <Link href="/" className="flex-shrink-0 relative group flex items-center gap-2.5">
+          <Link href="/" className="flex-shrink-0 relative group flex items-center gap-1.5 sm:gap-2.5 min-w-0">
             {/* Sol Köşe: 43. Yıl Altın İmzası */}
             <div
               className={cn(
-                'relative transition-all duration-300 ease-out flex-shrink-0 -mt-2',
-                scrolled ? 'w-14 h-7' : 'w-20 h-10'
+                'relative transition-all duration-300 ease-out flex-shrink-0 sm:-mt-2',
+                scrolled ? 'w-9 h-5 sm:w-14 sm:h-7' : 'w-10 h-5 sm:w-20 sm:h-10'
               )}
             >
               <Image
                 src="/resim/43yil-crop.png"
                 alt="43. Yıl"
                 fill
-                sizes="80px"
+                sizes="(max-width: 640px) 40px, 80px"
                 className="object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.28)] transition-transform duration-300 group-hover:scale-105"
                 priority
               />
@@ -94,7 +94,7 @@ export function Navbar() {
             <div
               className={cn(
                 'relative transition-all duration-300 ease-out origin-left',
-                scrolled ? 'w-48 h-12' : 'w-60 h-15'
+                scrolled ? 'w-28 h-8 sm:w-48 sm:h-12' : 'w-32 h-9 sm:w-60 sm:h-15'
               )}
             >
               <Image
@@ -165,16 +165,17 @@ export function Navbar() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Search Trigger Button */}
             <button
               onClick={() => setSearchOpen(true)}
+              aria-label="Model veya ürün ara"
               className={cn(
                 'flex items-center gap-2.5 text-white/90 hover:text-white bg-white/15 hover:bg-white/25 rounded-xl border border-white/20 transition-all duration-200 cursor-pointer backdrop-blur-sm',
-                scrolled ? 'px-3.5 py-2 text-xs' : 'px-4 py-2.5 text-xs'
+                scrolled ? 'p-2 sm:px-3.5 sm:py-2 text-xs' : 'p-2 sm:px-4 sm:py-2.5 text-xs'
               )}
             >
-              <Search size={15} className="text-white/90" />
+              <Search size={16} className="sm:w-[15px] sm:h-[15px] text-white/90" />
               <span className="hidden sm:inline">Model veya ürün ara...</span>
             </button>
 
@@ -183,13 +184,13 @@ export function Navbar() {
               onClick={toggleCart}
               className={cn(
                 'relative rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-all duration-200 cursor-pointer backdrop-blur-sm',
-                scrolled ? 'p-2.5' : 'p-3'
+                scrolled ? 'p-2 sm:p-2.5' : 'p-2 sm:p-3'
               )}
               aria-label="Alışveriş Sepeti"
             >
-              <ShoppingCart size={scrolled ? 18 : 20} />
+              <ShoppingCart size={18} className={scrolled ? 'sm:w-[18px] sm:h-[18px]' : 'sm:w-5 sm:h-5'} />
               {mounted && totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 text-slate-950 text-[11px] font-black rounded-full flex items-center justify-center min-w-[20px] min-h-[20px] shadow-md">
+                <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-amber-400 text-slate-950 text-[10px] sm:text-[11px] font-black rounded-full flex items-center justify-center sm:min-w-[20px] sm:min-h-[20px] shadow-md">
                   {totalItems}
                 </span>
               )}
@@ -198,7 +199,8 @@ export function Navbar() {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-xl bg-white/15 text-white border border-white/20"
+              aria-label="Menü"
+              className="md:hidden p-2 rounded-xl bg-white/15 text-white border border-white/20 cursor-pointer"
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>

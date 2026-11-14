@@ -314,12 +314,12 @@ export default function HomePage() {
                   <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
 
                   {/* Appliance SVG Icon */}
-                  <div className="w-7 h-7 sm:w-11 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 group-hover:bg-white/15 border border-white/15 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-7 sm:[&>svg]:h-7">
+                  <div className="w-7 h-7 sm:w-11 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 group-hover:bg-white/15 border border-white/15 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shrink-0 [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-7 sm:[&>svg]:h-7">
                     {cat.icon}
                   </div>
 
                   {/* Category Label */}
-                  <span className="font-display text-[9px] sm:text-[11px] font-bold tracking-tight sm:tracking-wider uppercase leading-tight text-white drop-shadow-xs line-clamp-1">
+                  <span className="font-display text-[8.5px] sm:text-[11px] font-bold tracking-tight sm:tracking-wider uppercase leading-[1.15] sm:leading-tight text-white drop-shadow-xs min-h-[20px] sm:min-h-0 flex items-center justify-center text-center break-words w-full">
                     {cat.label}
                   </span>
 
