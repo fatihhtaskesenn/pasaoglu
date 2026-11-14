@@ -217,38 +217,65 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [igPosts, setIgPosts] = useState<InstagramPostItem[]>(initialInstagramPosts);
+  const [igPosts, setIgPosts] = useState<InstagramPostItem[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(true);
 
   useEffect(() => {
-    fetchProductsFromSupabase().then((liveProducts) => {
-      setProducts(liveProducts);
-      setProductsLoading(false);
-    });
+    let active = true;
 
-    fetchCampaignsFromSupabase().then((liveCampaigns) => {
-      if (liveCampaigns.length > 0) {
-        setIgPosts(
-          liveCampaigns.slice(0, 4).map((c) => ({
-            id: c.id,
-            image: c.image_url,
-            title: c.title,
-            permalink: c.target_url || '/setler',
-          }))
-        );
-        return;
-      }
+    fetchProductsFromSupabase()
+      .then((liveProducts) => {
+        if (!active) return;
+        setProducts(liveProducts);
+        setProductsLoading(false);
+      })
+      .catch(() => {
+        if (active) setProductsLoading(false);
+      });
 
-      fetch('/api/instagram')
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data?.posts) && data.posts.length > 0) {
-            setIgPosts(data.posts.slice(0, 4));
-          }
-        })
-        .catch(() => {
-          // Keep initial 4 Instagram posts
-        });
-    });
+    fetchCampaignsFromSupabase()
+      .then((liveCampaigns) => {
+        if (!active) return;
+        if (liveCampaigns.length > 0) {
+          setIgPosts(
+            liveCampaigns.slice(0, 4).map((c) => ({
+              id: c.id,
+              image: c.image_url,
+              title: c.title,
+              permalink: c.target_url || '/setler',
+            }))
+          );
+          setCampaignsLoading(false);
+          return;
+        }
+
+        fetch('/api/instagram')
+          .then((res) => res.json())
+          .then((data) => {
+            if (!active) return;
+            if (Array.isArray(data?.posts) && data.posts.length > 0) {
+              setIgPosts(data.posts.slice(0, 4));
+            } else {
+              setIgPosts(initialInstagramPosts);
+            }
+          })
+          .catch(() => {
+            if (active) setIgPosts(initialInstagramPosts);
+          })
+          .finally(() => {
+            if (active) setCampaignsLoading(false);
+          });
+      })
+      .catch(() => {
+        if (active) {
+          setIgPosts(initialInstagramPosts);
+          setCampaignsLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const selectedCatObj = applianceCategories.find((c) => c.id === activeCategory);
@@ -339,26 +366,34 @@ export default function HomePage() {
         {/* ─── Latest 4 Instagram Campaign Posts (Directly Under Category Strip) ─── */}
         {!selectedCatObj && (
           <div className="mb-6 sm:mb-16">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
-              {igPosts.slice(0, 4).map((post, idx) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, delay: idx * 0.06 }}
-                  className="relative aspect-[54/77] rounded-lg sm:rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shadow-sm"
-                >
-                  <Image
-                    src={post.image}
-                    alt={post.title}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
-                    unoptimized={post.image.startsWith('http')}
+            {campaignsLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-[54/77] rounded-lg sm:rounded-xl bg-slate-200/70 animate-pulse"
                   />
-                </motion.div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+                {igPosts.slice(0, 4).map((post) => (
+                  <div
+                    key={post.id}
+                    className="relative aspect-[54/77] rounded-lg sm:rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shadow-sm"
+                  >
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover"
+                      unoptimized={post.image.startsWith('http')}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -384,14 +419,11 @@ export default function HomePage() {
             </p>
           </div>
         ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-8"
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-8">
             {displayedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </motion.div>
+          </div>
         )}
       </section>
     </div>

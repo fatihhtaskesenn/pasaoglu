@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
   ShoppingCart,
   Star,
@@ -66,10 +65,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const imageSrc = product.images?.[0] || '/resim/pasaoglulogo-crop.png';
 
   return (
-    <motion.div
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="bg-white border border-slate-200/90 hover:border-[#005596]/50 rounded-2xl overflow-hidden shadow-2xs hover:shadow-lg transition-all flex flex-col group relative"
+    <div
+      className="bg-white border border-slate-200/90 hover:border-[#005596]/50 rounded-2xl overflow-hidden shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col group relative"
     >
       <Link href={`/urun/${product.slug}`} className="flex-1 flex flex-col">
         {/* ─── Top Clean Studio Image Frame ──────────────────── */}
@@ -183,6 +180,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

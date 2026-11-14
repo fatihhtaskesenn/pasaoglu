@@ -47,11 +47,16 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    fetchProductsFromSupabase().then(setLiveProducts);
     const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (searchOpen && liveProducts.length === 0) {
+      fetchProductsFromSupabase().then(setLiveProducts);
+    }
+  }, [searchOpen, liveProducts.length]);
 
   const searchResults = searchQuery.trim()
     ? liveProducts.filter((p) => matchesProductSearch(p, searchQuery))
