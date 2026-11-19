@@ -34,7 +34,7 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
   const productImages =
     product.images && product.images.length > 0
       ? product.images
-      : ['/resim/pasaoglulogo-crop.png'];
+      : ['/resim/imageee.png'];
   const currentImage = productImages[activeImageIdx] || productImages[0];
 
   const effectivePrice = product.discountedPrice ?? product.price;
@@ -123,7 +123,7 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
               {/* Official Dealer Badge */}
               <div className="mt-2 flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
                 <ShieldCheck size={15} className="text-[#005596]" />
-                <span>Paşaoğlu Mağazaları • Resmi Yetkili Bayi Garantili</span>
+                <span>Profilo Yetkili Bayi • Resmi Yetkili Bayi Garantili</span>
               </div>
             </div>
 
@@ -133,7 +133,7 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
                 { icon: ShieldCheck, title: 'Resmi Garanti', desc: 'BSH / Profilo Güvencesi' },
                 { icon: Truck, title: 'Ücretsiz Teslimat', desc: 'Gaziantep İçi Özel Sevkiyat' },
                 { icon: Wrench, title: 'Yetkili Kurulum', desc: 'Ücretsiz Yetkili Servis Montajı' },
-                { icon: RotateCcw, title: 'Mağaza Güvencesi', desc: '43 Yıllık Esnaf Güveni' },
+                { icon: RotateCcw, title: 'Mağaza Güvencesi', desc: 'Resmi Yetkili Bayi Güveni' },
               ].map(({ icon: Icon, title, desc }) => (
                 <div
                   key={title}
@@ -280,7 +280,7 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <a
                   href={`https://wa.me/905370103427?text=${encodeURIComponent(
-                    `Merhaba Paşaoğlu Mağazaları, aşağıdaki ürünü sipariş vermek istiyorum:\n\n• Ürün: ${product.name}\n• Model Kodu: ${modelCode}\n• Adet: ${quantity}\n• Toplam Tutar: ${formatPrice(effectivePrice * quantity)}\n\nTeslimat ve ödeme işlemleri için bilgi alabilir miyim?`
+                    `Merhaba Profilo Yetkili Bayi, aşağıdaki ürünü sipariş vermek istiyorum:\n\n• Ürün: ${product.name}\n• Model Kodu: ${modelCode}\n• Adet: ${quantity}\n• Toplam Tutar: ${formatPrice(effectivePrice * quantity)}\n\nTeslimat ve ödeme işlemleri için bilgi alabilir miyim?`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

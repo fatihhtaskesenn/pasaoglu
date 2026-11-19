@@ -117,7 +117,7 @@ export default function SetlerPage() {
             <div className="space-y-2.5 sm:space-y-3 max-w-2xl">
               <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-sky-200">
                 <PackageCheck size={15} className="text-sky-300" />
-                <span>Paşaoğlu Mağazaları • Çoklu Çeyiz & Ev Paketleri</span>
+                <span>Profilo Yetkili Bayi • Çoklu Çeyiz & Ev Paketleri</span>
               </div>
               <h1 className="font-display text-2xl sm:text-5xl font-bold tracking-tight">
                 Beyaz Eşya & Çeyiz Setlerimiz

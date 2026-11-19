@@ -12,7 +12,7 @@ const footerLinks = {
     { label: 'Toplu Çeyiz & Beyaz Eşya Setleri', href: '/setler' },
   ],
   'Kurumsal': [
-    { label: 'Hakkımızda (43 Yıl)', href: '/hakkimizda' },
+    { label: 'Hakkımızda', href: '/hakkimizda' },
     { label: 'Şubelerimiz & Konum', href: '/iletisim#subeler' },
     { label: 'İletişim & Destek', href: '/iletisim' },
     { label: 'Yetkili Bayi Güvencesi', href: '/hakkimizda' },
@@ -20,9 +20,8 @@ const footerLinks = {
   'Şubelerimiz': [
     { label: 'Akkent Şubesi (Yol Tarifi)', href: 'https://maps.app.goo.gl/b1DrPiti9LznG1Bc8' },
     { label: 'Şehreküstü Şubesi (Yol Tarifi)', href: 'https://maps.app.goo.gl/7mPcVJ6krGBGg5ot7' },
-    { label: 'Enes Paşaoğlu: 0537 010 34 27', href: 'tel:+905370103427' },
-    { label: 'Zekeriya Paşaoğlu: 0551 044 56 58', href: 'tel:+905510445658' },
-    { label: 'Instagram: @pasaoglu_profilo', href: 'https://www.instagram.com/pasaoglu_profilo/' },
+    { label: 'Mağaza Destek: 0537 010 34 27', href: 'tel:+905370103427' },
+    { label: 'Satış Danışma: 0551 044 56 58', href: 'tel:+905510445658' },
   ],
 };
 
@@ -38,19 +37,19 @@ export function Footer() {
           <div className="md:col-span-2 space-y-4">
             <div className="relative w-48 h-12">
               <Image
-                src="/resim/pasaoglulogo-crop.png"
-                alt="Paşaoğlu Mağazaları"
+                src="/resim/profilologo.png"
+                alt="Profilo Yetkili Bayi"
                 fill
                 sizes="192px"
-                className="object-contain"
+                className="object-contain object-left"
               />
             </div>
             <p className="text-sm text-ink-soft leading-relaxed max-w-sm">
-              Gaziantep&apos;in 43 yıllık köklü beyaz eşya ve tüketici elektroniği bayisi.
-              1983&apos;ten bu yana eviniz için dünya lideri teknolojileri en güvenilir koşullarla sunuyoruz.
+              Gaziantep Profilo Yetkili Satış Mağazası. Beyaz eşya, ankastre, TV, klima ve
+              küçük ev aletlerinde resmi bayi güvencesi ile hizmetinizdeyiz.
             </p>
             <p className="text-xs text-steel font-display tracking-widest uppercase">
-              43 Yıldır Eviniz İçin Geleceğin Teknolojisi
+              Profilo Güvencesiyle Eviniz İçin Geleceğin Teknolojisi
             </p>
 
             <div className="pt-2 flex flex-col gap-2 text-xs text-slate-600">
@@ -59,14 +58,14 @@ export function Footer() {
                 className="inline-flex items-center gap-2 hover:text-[#005596] font-medium transition-colors"
               >
                 <Phone size={13} className="text-[#005596]" />
-                <span>Enes Paşaoğlu: +90 537 010 34 27</span>
+                <span>Mağaza Destek: +90 537 010 34 27</span>
               </a>
               <a
                 href="tel:+905510445658"
                 className="inline-flex items-center gap-2 hover:text-[#005596] font-medium transition-colors"
               >
                 <Phone size={13} className="text-[#005596]" />
-                <span>Zekeriya Paşaoğlu: +90 551 044 56 58</span>
+                <span>Satış Danışma: +90 551 044 56 58</span>
               </a>
               <div className="inline-flex items-center gap-2 text-slate-500">
                 <Clock size={13} className="text-amber-600" />
@@ -114,7 +113,7 @@ export function Footer() {
         <Separator className="my-10 bg-line" />
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-ink-soft">
-          <p>© 2026 Paşaoğlu Mağazaları. 43 Yıllık Resmi Bayi Güvencesiyle.</p>
+          <p>© 2026 Profilo Yetkili Satış Mağazası. Resmi Bayi Güvencesiyle.</p>
           <div className="flex gap-6">
             <Link href="/hakkimizda" className="hover:text-ink transition-colors">Hakkımızda</Link>
             <Link href="/iletisim" className="hover:text-ink transition-colors">Şubelerimiz</Link>

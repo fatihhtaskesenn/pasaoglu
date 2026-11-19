@@ -44,14 +44,14 @@ const branches = [
   {
     id: 'sehrekustu',
     name: 'Şehreküstü Şubesi',
-    type: 'Merkez Şube (Kuruluş 1983)',
+    type: 'Merkez Şube',
     address: 'Şehreküstü Mahallesi, Şahinbey / Gaziantep',
     googleMapsUrl: 'https://maps.app.goo.gl/7mPcVJ6krGBGg5ot7',
     embedMapUrl:
       'https://maps.google.com/maps?q=%C5%9Eehrek%C3%BCst%C3%BC+Mahallesi,+%C5%9Eahinbey,+Gaziantep&t=&z=15&ie=UTF8&iwloc=&output=embed',
     hours: 'Pazartesi - Cumartesi: 08:30 - 20:00 • Pazar: 11:00 - 18:30',
     description:
-      'Paşaoğlu Mağazaları\'nın 43 yıllık köklü geçmişine ev sahipliği yapan merkez mağazamız.',
+      'Gaziantep merkezde Profilo beyaz eşya ve elektronik ürünlerini sergileyen merkez şubemiz.',
     photos: [
       { src: '/resim/subeler/sehrekustu/sehre1.jpeg', label: 'Şehreküstü Şubesi Görünüm 1' },
       { src: '/resim/subeler/sehrekustu/sehre2.jpeg', label: 'Şehreküstü Şubesi Görünüm 2' },
@@ -63,12 +63,12 @@ const branches = [
 
 const contacts = [
   {
-    name: 'Enes Paşaoğlu',
+    name: 'Mağaza Destek Hattı',
     phone: '+90 537 010 34 27',
     cleanPhone: '905370103427',
   },
   {
-    name: 'Zekeriya Paşaoğlu',
+    name: 'Satış & Çeyiz Danışma',
     phone: '+90 551 044 56 58',
     cleanPhone: '905510445658',
   },
@@ -135,20 +135,20 @@ export default function IletisimPage() {
           <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold tracking-widest uppercase rounded">
               <Building2 size={13} className="text-[#005596]" />
-              <span>Paşaoğlu Mağazaları • İletişim Direktörlüğü</span>
+              <span>Profilo Yetkili Bayi • İletişim & Şubeler</span>
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">
-              Yetkililerimiz & <span className="text-[#005596]">Şubelerimiz</span>
+              Müşteri Hizmetleri & <span className="text-[#005596]">Şubelerimiz</span>
             </h1>
             <p className="text-base sm:text-lg text-slate-700 leading-relaxed">
-              Ürün danışmanlığı, kurumsal teklif talepleri ve showroom ziyareti için yönetim kurulu üyelerimiz
-              ve şube koordinatörlerimizle doğrudan iletişime geçebilirsiniz.
+              Ürün danışmanlığı, kurumsal teklif talepleri ve showroom ziyareti için satış
+              temsilcilerimiz ve şube koordinatörlerimizle doğrudan iletişime geçebilirsiniz.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ─── Direct Contact Cards (Enes & Zekeriya Paşaoğlu + Instagram) ─ */}
+      {/* ─── Direct Contact Cards ─── */}
       <section className="max-w-screen-xl mx-auto px-6 py-12 border-b border-slate-200">
         <div className="mb-6">
           <h2 className="font-display text-2xl font-bold text-slate-900">
@@ -156,7 +156,7 @@ export default function IletisimPage() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {contacts.map((contact, idx) => (
             <div
               key={idx}
@@ -195,83 +195,6 @@ export default function IletisimPage() {
               </div>
             </div>
           ))}
-
-          {/* Official Instagram Card */}
-          <div className="bg-white border border-slate-200 hover:border-pink-500/40 rounded-xl p-6 flex flex-col justify-between gap-5 transition-colors">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <span className="text-[11px] font-bold text-pink-600 uppercase tracking-wider block">
-                  Sosyal Medya
-                </span>
-                <h3 className="font-display text-lg font-bold text-slate-900 mt-0.5">
-                  Resmi Instagram Hesabımız
-                </h3>
-                <a
-                  href="https://www.instagram.com/pasaoglu_profilo/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-bold text-[#005596] hover:text-pink-600 transition-colors mt-1 inline-flex items-center gap-1.5"
-                >
-                  <span>@pasaoglu_profilo</span>
-                </a>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Güncel kampanyalar, yeni ürünler ve mağazalarımızdan kareler için takip edin.
-                </p>
-              </div>
-
-              {/* Instagram Gradient Logo Badge */}
-              <a
-                href="https://www.instagram.com/pasaoglu_profilo/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shadow-md hover:scale-105 transition-transform flex-shrink-0"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                </svg>
-              </a>
-            </div>
-
-            <div className="pt-3 border-t border-slate-100">
-              <a
-                href="https://www.instagram.com/pasaoglu_profilo/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-95 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-opacity shadow-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                </svg>
-                <span>Instagram&apos;da Takip Et (@pasaoglu_profilo)</span>
-                <ExternalLink size={13} />
-              </a>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -435,7 +358,7 @@ export default function IletisimPage() {
                   Talebiniz Alındı
                 </h3>
                 <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                  Sayın <strong>{formData.name}</strong>, mesajınız Enes ve Zekeriya Paşaoğlu&apos;na
+                  Sayın <strong>{formData.name}</strong>, mesajınız Profilo Yetkili Satış Mağazamıza
                   iletilmiştir. En kısa süre içinde <strong>{formData.phone}</strong> numaranızdan sizinle
                   iletişim kurulacaktır.
                 </p>
@@ -549,12 +472,11 @@ export default function IletisimPage() {
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white border border-slate-200 rounded-3xl p-8 space-y-5 shadow-sm">
               <h3 className="font-display text-xl font-bold text-slate-900">
-                43 Yıllık Resmi Bayi Güvencesi
+                Resmi Profilo Yetkili Bayi Güvencesi
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Paşaoğlu Mağazaları üzerinden gerçekleştireceğiniz tüm alışverişler, kurucumuz Mehmet Ali Paşaoğlu
-                ve yöneticilerimiz Enes & Zekeriya Paşaoğlu&apos;nun 43 yıllık kurumsal ticari itibarıyla teminat
-                altındadır.
+                Mağazalarımız üzerinden gerçekleştireceğiniz tüm alışverişler, BSH Ev Aletleri &amp;
+                Profilo resmi distribütör garantisi ve yetkili bayi güvencesi altındadır.
               </p>
 
               <div className="space-y-3 pt-2">
@@ -589,10 +511,10 @@ export default function IletisimPage() {
               </p>
               <div className="pt-2 flex flex-col gap-2 font-mono text-sm font-bold text-amber-300">
                 <a href="tel:+905370103427" className="hover:underline flex items-center gap-2">
-                  <Phone size={14} /> Enes Paşaoğlu: 0537 010 34 27
+                  <Phone size={14} /> Mağaza Destek: 0537 010 34 27
                 </a>
                 <a href="tel:+905510445658" className="hover:underline flex items-center gap-2">
-                  <Phone size={14} /> Zekeriya Paşaoğlu: 0551 044 56 58
+                  <Phone size={14} /> Satış Danışma: 0551 044 56 58
                 </a>
               </div>
             </div>

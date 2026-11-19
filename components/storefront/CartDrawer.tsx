@@ -21,7 +21,7 @@ export function CartDrawer() {
 
   const buildWhatsAppCartUrl = () => {
     const lines = [
-      'Merhaba Paşaoğlu Mağazaları, aşağıdaki ürünleri sipariş vermek istiyorum:',
+      'Merhaba Profilo Yetkili Bayi, aşağıdaki ürünleri sipariş vermek istiyorum:',
       '',
       ...items.map(({ product, quantity }, idx) => {
         const unit = product.discountedPrice ?? product.price;
@@ -108,7 +108,7 @@ export function CartDrawer() {
                       {/* Thumbnail */}
                       <div className="relative w-16 h-16 rounded-lg bg-white border border-slate-100 flex-shrink-0 flex items-center justify-center p-1 overflow-hidden">
                         <Image
-                          src={product.images[0] || '/resim/pasaoglulogo-crop.png'}
+                          src={product.images[0] || '/resim/imageee.png'}
                           alt={product.name}
                           fill
                           sizes="64px"

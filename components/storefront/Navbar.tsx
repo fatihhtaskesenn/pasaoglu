@@ -71,38 +71,20 @@ export function Navbar() {
         )}
       >
         <nav className="max-w-screen-xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2 sm:gap-8 transition-all duration-300">
-          {/* Brand Logo + Sol Köşede 43. Yıl Altın Logosu */}
-          <Link href="/" className="flex-shrink-0 relative group flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-            {/* Sol Köşe: 43. Yıl Altın İmzası */}
-            <div
-              className={cn(
-                'relative transition-all duration-300 ease-out flex-shrink-0 sm:-mt-2',
-                scrolled ? 'w-9 h-5 sm:w-14 sm:h-7' : 'w-10 h-5 sm:w-20 sm:h-10'
-              )}
-            >
-              <Image
-                src="/resim/43yil-crop.png"
-                alt="43. Yıl"
-                fill
-                sizes="(max-width: 640px) 40px, 80px"
-                className="object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.28)] transition-transform duration-300 group-hover:scale-105"
-                priority
-              />
-            </div>
-
-            {/* Paşaoğlu Mağazaları Ana Logo */}
+          {/* Profilo Ana Logo */}
+          <Link href="/" className="flex-shrink-0 relative group flex items-center min-w-0">
             <div
               className={cn(
                 'relative transition-all duration-300 ease-out origin-left',
-                scrolled ? 'w-28 h-8 sm:w-48 sm:h-12' : 'w-32 h-9 sm:w-60 sm:h-15'
+                scrolled ? 'w-28 h-8 sm:w-48 sm:h-12' : 'w-32 h-9 sm:w-56 sm:h-14'
               )}
             >
               <Image
-                src="/resim/pasaoglulogo-crop.png"
-                alt="Paşaoğlu Mağazaları"
+                src="/resim/profilobyeazlogo.png"
+                alt="Profilo Yetkili Bayi"
                 fill
-                sizes="(max-width: 768px) 192px, 240px"
-                className="object-contain brightness-0 invert transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 768px) 192px, 224px"
+                className="object-contain transition-transform duration-300 group-hover:scale-105"
                 priority
                 loading="eager"
               />
@@ -300,7 +282,7 @@ export function Navbar() {
                       <div className="flex items-center gap-3">
                         <div className="relative w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center p-1">
                           <Image
-                            src={product.images[0] || '/resim/pasaoglulogo-crop.png'}
+                            src={product.images[0] || '/resim/imageee.png'}
                             alt={product.name}
                             fill
                             sizes="48px"

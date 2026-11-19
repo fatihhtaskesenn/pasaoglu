@@ -62,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
     .filter((f) => !f.startsWith('Model Kodu:'))
     .slice(0, 2);
 
-  const imageSrc = product.images?.[0] || '/resim/pasaoglulogo-crop.png';
+  const imageSrc = product.images?.[0] || '/resim/imageee.png';
 
   return (
     <div

@@ -509,7 +509,7 @@ function UrunlerContent() {
                             <div className="flex items-center gap-2.5 min-w-0">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
-                                src={item.images[0] || '/resim/pasaoglulogo-crop.png'}
+                                src={item.images[0] || '/resim/imageee.png'}
                                 alt={item.name}
                                 className="w-8 h-8 rounded-lg object-contain bg-slate-50 border border-slate-100 shrink-0"
                               />

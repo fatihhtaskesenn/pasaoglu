@@ -32,11 +32,11 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/admin" className="flex items-center justify-between gap-2">
           <div className="relative w-36 h-10">
             <Image
-              src="/resim/pasaoglulogo-crop.png"
-              alt="Paşaoğlu Mağazaları"
+              src="/resim/profilobyeazlogo.png"
+              alt="Profilo Yetkili Bayi"
               fill
               sizes="144px"
-              className="object-contain brightness-0 invert"
+              className="object-contain"
             />
           </div>
           <span className="text-[10px] font-bold text-emerald-300 bg-emerald-400/15 border border-emerald-400/30 px-2 py-0.5 rounded-md uppercase">

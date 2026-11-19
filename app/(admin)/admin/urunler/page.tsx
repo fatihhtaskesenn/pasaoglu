@@ -214,7 +214,7 @@ export default function AdminCatalogPage() {
     setProdDiscounted(item.discountedPrice ? String(item.discountedPrice) : '');
     setProdStock(String(item.stock));
     const existingImages = (item.images || []).filter(
-      (img) => img && img !== '/resim/pasaoglulogo-crop.png'
+      (img) => img && img !== '/resim/pasaoglulogo-crop.png' && img !== '/resim/imageee.png'
     );
     setProdImages(existingImages.slice(0, MAX_PRODUCT_IMAGES));
     setProdImageInput('');
@@ -670,12 +670,12 @@ export default function AdminCatalogPage() {
       prodDesc.trim() ||
       (mergedFeatures.length > 0
         ? `${prodName.trim()} — ${mergedFeatures.slice(0, 4).join(', ')}.`
-        : `${prodName.trim()} — Resmi Profilo Yetkili Bayisi Paşaoğlu Mağazaları güvencesiyle.`);
+        : `${prodName.trim()} — Resmi Profilo Yetkili Bayi güvencesiyle.`);
 
     const finalImages =
       prodImages.length > 0
         ? prodImages.slice(0, MAX_PRODUCT_IMAGES)
-        : ['/resim/pasaoglulogo-crop.png'];
+        : ['/resim/imageee.png'];
 
     const payload = {
       name: prodName,
@@ -1377,7 +1377,7 @@ export default function AdminCatalogPage() {
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={item.images[0] || '/resim/pasaoglulogo-crop.png'}
+                          src={item.images[0] || '/resim/imageee.png'}
                           alt={item.name}
                           className="w-11 h-11 rounded-lg object-contain bg-white border border-slate-200 shrink-0"
                         />

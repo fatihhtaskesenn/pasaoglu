@@ -172,7 +172,7 @@ function OledTV() {
   const glowRef = useRef<THREE.PointLight>(null);
 
   // Load the logo texture from exact path
-  const texture = useLoader(THREE.TextureLoader, '/resim/pasaoglulogo.jpeg');
+  const texture = useLoader(THREE.TextureLoader, '/resim/profilologo.png');
 
   useFrame(({ clock }) => {
     if (glowRef.current) {

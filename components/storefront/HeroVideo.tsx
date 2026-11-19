@@ -14,19 +14,19 @@ interface HeroSlide {
 const defaultHeroSlides: HeroSlide[] = [
   {
     src: '/resim/magaza-foto/akkent4.png',
-    alt: 'Paşaoğlu Mağazaları — Akkent Profilo Yetkili Satış Mağazası Dış Cephe',
+    alt: 'Profilo Yetkili Bayi — Akkent Profilo Yetkili Satış Mağazası Dış Cephe',
     objectPosition: 'center center',
     fitMode: 'cover',
   },
   {
     src: '/resim/magaza-foto/akknet1.jpeg',
-    alt: 'Paşaoğlu Mağazaları — Akkent Şubesi Geniş Panoramik Showroom',
+    alt: 'Profilo Yetkili Bayi — Akkent Şubesi Geniş Panoramik Showroom',
     objectPosition: 'center center',
     fitMode: 'cover',
   },
   {
     src: '/resim/magaza-foto/sehre2.png',
-    alt: 'Paşaoğlu Mağazaları — Şehreküstü Merkez Şubesi Dış Cephe',
+    alt: 'Profilo Yetkili Bayi — Şehreküstü Merkez Şubesi Dış Cephe',
     objectPosition: 'center center',
     fitMode: 'cover',
   },
@@ -47,7 +47,7 @@ export function HeroVideo() {
           setSlides(
             liveSlides.map((s) => ({
               src: s.image_url,
-              alt: s.title || 'Paşaoğlu Mağazaları',
+              alt: s.title || 'Profilo Yetkili Bayi',
               objectPosition: 'center center',
               fitMode: s.fit_mode || 'contain',
             }))

@@ -17,13 +17,13 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Paşaoğlu Mağazaları — Eviniz İçin Geleceğin Teknolojisi',
+  title: 'Profilo Yetkili Bayi — Eviniz İçin Geleceğin Teknolojisi',
   description:
-    'Türkiye\'nin en seçkin beyaz eşya ve tüketici elektroniği mağazası. Samsung, LG, Bosch, Apple ve lider markaların en yeni nesil teknolojileri.',
-  keywords: ['beyaz eşya', 'elektronik', 'paşaoğlu', 'tv', 'klima', 'buzdolabı'],
-  authors: [{ name: 'Paşaoğlu Mağazaları' }],
+    'Profilo Yetkili Satış Mağazası. Beyaz eşya, ankastre, TV, klima ve küçük ev aletlerinde yetkili bayi güvencesi ve hızlı teslimat.',
+  keywords: ['beyaz eşya', 'elektronik', 'profilo', 'profilo yetkili bayi', 'tv', 'klima', 'buzdolabı'],
+  authors: [{ name: 'Profilo Yetkili Bayi' }],
   openGraph: {
-    title: 'Paşaoğlu Mağazaları',
+    title: 'Profilo Yetkili Bayi',
     description: 'Eviniz İçin Geleceğin Teknolojisi',
     type: 'website',
   },

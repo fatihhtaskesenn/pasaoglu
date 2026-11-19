@@ -71,7 +71,7 @@ export const useCartStore = create<CartStore>()(
           0
         ),
     }),
-    { name: 'pasaoglu-cart' }
+    { name: 'profilo-cart' }
   )
 );
 

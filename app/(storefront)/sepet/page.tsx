@@ -55,7 +55,7 @@ export default function SepetPage() {
   const generateWhatsAppMessageUrl = (customOrderNo?: string) => {
     const ordNo = customOrderNo || `PSG-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     const lines = [
-      `Merhaba Paşaoğlu Mağazaları, web siteniz üzerinden sipariş vermek istiyorum.`,
+      `Merhaba Profilo Yetkili Bayi, web siteniz üzerinden sipariş vermek istiyorum.`,
       `Sipariş No: ${ordNo}`,
       '',
       '📦 *SİPARİŞ EDİLEN ÜRÜNLER:*',
@@ -273,7 +273,7 @@ export default function SepetPage() {
                         <div className="flex items-center gap-4 min-w-0 flex-1">
                           <div className="relative w-16 h-16 rounded-xl bg-white border border-slate-200 flex-shrink-0 flex items-center justify-center p-2">
                             <Image
-                              src={product.images[0] || '/resim/pasaoglulogo-crop.png'}
+                              src={product.images[0] || '/resim/imageee.png'}
                               alt={product.name}
                               fill
                               sizes="64px"
@@ -435,7 +435,7 @@ export default function SepetPage() {
                       <p className="text-emerald-800/90 leading-relaxed">
                         Aşağıdaki teslimat bilgilerinizi doldurup onayladığınızda, sepetinizdeki tüm
                         ürünler, model kodları, adetler ve adres bilgileriniz otomatik olarak
-                        WhatsApp mesajına dönüştürülerek Paşaoğlu Mağazaları satış hattımıza
+                        WhatsApp mesajına dönüştürülerek Profilo Yetkili Bayi satış hattımıza
                         yönlendirilir.
                       </p>
                     </div>
@@ -650,7 +650,7 @@ export default function SepetPage() {
 
               <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-500 text-center">
                 <ShieldCheck size={14} className="text-[#005596]" />
-                <span>Paşaoğlu Mağazaları • Resmi Yetkili Bayi Güvencesi</span>
+                <span>Profilo Yetkili Bayi • Resmi Yetkili Bayi Güvencesi</span>
               </div>
             </div>
           </div>

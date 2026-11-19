@@ -182,7 +182,7 @@ function mapRowToProduct(row: DbProductRow): Product {
     images:
       Array.isArray(row.images) && row.images.length > 0
         ? row.images
-        : ['/resim/pasaoglulogo-crop.png'],
+        : ['/resim/imageee.png'],
     description: row.description || '',
     features: Array.isArray(row.features) ? row.features : [],
     tags: Array.isArray(row.tags) ? row.tags : [],
@@ -437,7 +437,7 @@ export async function createHomepageSlideInSupabase(input: {
   const { data, error } = await supabase
     .from('homepage_slides')
     .insert({
-      title: input.title?.trim() || 'Paşaoğlu Mağazaları',
+      title: input.title?.trim() || 'Profilo Yetkili Bayi',
       image_url: input.image_url,
       fit_mode: input.fit_mode || 'contain',
       display_order: input.display_order ?? 0,

@@ -10,7 +10,7 @@ import {
 } from '@/types';
 
 // ============================================================
-// PAŞAOĞLU MAĞAZALARI — Resmi Ürün Kataloğu (28 Model)
+// PROFILO YETKİLİ BAYİ — Resmi Ürün Kataloğu (28 Model)
 // ============================================================
 
 export const mockProducts: Product[] = [
@@ -1056,7 +1056,7 @@ export const mockOrders: Order[] = [
     id: 'ord-005',
     orderNumber: 'PSG-2026-10478',
     customerId: 'cust-005',
-    customerName: 'Mehmet Ali Demir',
+    customerName: 'Ahmet Yılmaz',
     customerEmail: 'm.demir@holding.com.tr',
     customerPhone: '+90 532 909 1453',
     items: [
