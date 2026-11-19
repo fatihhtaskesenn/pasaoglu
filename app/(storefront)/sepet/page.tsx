@@ -31,8 +31,8 @@ export default function SepetPage() {
     name: '',
     email: '',
     phone: '',
-    city: 'Gaziantep',
-    district: 'Şahinbey',
+    city: '',
+    district: '',
     address: '',
     orderNotes: '',
     cardName: '',
@@ -53,7 +53,7 @@ export default function SepetPage() {
   const finalTotal = subtotal + shipping;
 
   const generateWhatsAppMessageUrl = (customOrderNo?: string) => {
-    const ordNo = customOrderNo || `PSG-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+    const ordNo = customOrderNo || `PRF-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     const lines = [
       `Merhaba Profilo Yetkili Bayi, web siteniz üzerinden sipariş vermek istiyorum.`,
       `Sipariş No: ${ordNo}`,
@@ -84,12 +84,12 @@ export default function SepetPage() {
       }
     }
 
-    return `https://wa.me/905370103427?text=${encodeURIComponent(lines.join('\n'))}`;
+    return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
   };
 
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    const newOrderNum = `PSG-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+    const newOrderNum = `PRF-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     const waUrl = generateWhatsAppMessageUrl(newOrderNum);
     setOrderNumber(newOrderNum);
     setLastWhatsAppUrl(waUrl);

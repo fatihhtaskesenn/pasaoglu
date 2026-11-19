@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import { Phone, MapPin, Clock } from 'lucide-react';
+import { Clock, ShieldCheck } from 'lucide-react';
 
 const footerLinks = {
   'Ürünler': [
@@ -13,15 +13,15 @@ const footerLinks = {
   ],
   'Kurumsal': [
     { label: 'Hakkımızda', href: '/hakkimizda' },
-    { label: 'Şubelerimiz & Konum', href: '/iletisim#subeler' },
     { label: 'İletişim & Destek', href: '/iletisim' },
     { label: 'Yetkili Bayi Güvencesi', href: '/hakkimizda' },
+    { label: 'Çeyiz & Avantaj Setleri', href: '/setler' },
   ],
-  'Şubelerimiz': [
-    { label: 'Akkent Şubesi (Yol Tarifi)', href: 'https://maps.app.goo.gl/b1DrPiti9LznG1Bc8' },
-    { label: 'Şehreküstü Şubesi (Yol Tarifi)', href: 'https://maps.app.goo.gl/7mPcVJ6krGBGg5ot7' },
-    { label: 'Mağaza Destek: 0537 010 34 27', href: 'tel:+905370103427' },
-    { label: 'Satış Danışma: 0551 044 56 58', href: 'tel:+905510445658' },
+  'Müşteri Hizmetleri': [
+    { label: 'Teklif & Bilgi Formu', href: '/iletisim' },
+    { label: 'Sepetim & Sipariş', href: '/sepet' },
+    { label: 'Tüm Ürünleri İncele', href: '/urunler' },
+    { label: 'Profilo Yetkili Servis Güvencesi', href: '/hakkimizda' },
   ],
 };
 
@@ -45,7 +45,7 @@ export function Footer() {
               />
             </div>
             <p className="text-sm text-ink-soft leading-relaxed max-w-sm">
-              Gaziantep Profilo Yetkili Satış Mağazası. Beyaz eşya, ankastre, TV, klima ve
+              Profilo Yetkili Satış Mağazası. Beyaz eşya, ankastre, TV, klima ve
               küçük ev aletlerinde resmi bayi güvencesi ile hizmetinizdeyiz.
             </p>
             <p className="text-xs text-steel font-display tracking-widest uppercase">
@@ -53,20 +53,10 @@ export function Footer() {
             </p>
 
             <div className="pt-2 flex flex-col gap-2 text-xs text-slate-600">
-              <a
-                href="tel:+905370103427"
-                className="inline-flex items-center gap-2 hover:text-[#005596] font-medium transition-colors"
-              >
-                <Phone size={13} className="text-[#005596]" />
-                <span>Mağaza Destek: +90 537 010 34 27</span>
-              </a>
-              <a
-                href="tel:+905510445658"
-                className="inline-flex items-center gap-2 hover:text-[#005596] font-medium transition-colors"
-              >
-                <Phone size={13} className="text-[#005596]" />
-                <span>Satış Danışma: +90 551 044 56 58</span>
-              </a>
+              <div className="inline-flex items-center gap-2 text-slate-600 font-medium">
+                <ShieldCheck size={14} className="text-[#005596]" />
+                <span>Resmi Distribütör &amp; Yetkili Servis Garantili</span>
+              </div>
               <div className="inline-flex items-center gap-2 text-slate-500">
                 <Clock size={13} className="text-amber-600" />
                 <span>Pzt - Cts: 08:30 - 20:00 • Pazar: 11:00 - 18:30</span>
@@ -81,30 +71,16 @@ export function Footer() {
                 {title}
               </h4>
               <ul className="space-y-2.5">
-                {links.map((link) => {
-                  const isExternal = link.href.startsWith('http') || link.href.startsWith('tel:');
-                  return (
-                    <li key={link.label}>
-                      {isExternal ? (
-                        <a
-                          href={link.href}
-                          target={link.href.startsWith('http') ? '_blank' : undefined}
-                          rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                          className="text-xs sm:text-sm text-ink-soft hover:text-[#005596] transition-colors duration-150 inline-block"
-                        >
-                          {link.label}
-                        </a>
-                      ) : (
-                        <Link
-                          href={link.href}
-                          className="text-xs sm:text-sm text-ink-soft hover:text-[#005596] transition-colors duration-150 inline-block"
-                        >
-                          {link.label}
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
+                {links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-xs sm:text-sm text-ink-soft hover:text-[#005596] transition-colors duration-150 inline-block"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           ))}
@@ -116,7 +92,7 @@ export function Footer() {
           <p>© 2026 Profilo Yetkili Satış Mağazası. Resmi Bayi Güvencesiyle.</p>
           <div className="flex gap-6">
             <Link href="/hakkimizda" className="hover:text-ink transition-colors">Hakkımızda</Link>
-            <Link href="/iletisim" className="hover:text-ink transition-colors">Şubelerimiz</Link>
+            <Link href="/urunler" className="hover:text-ink transition-colors">Ürünler</Link>
             <Link href="/iletisim" className="hover:text-ink transition-colors">İletişim</Link>
           </div>
         </div>

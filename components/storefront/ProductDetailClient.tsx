@@ -131,7 +131,7 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: ShieldCheck, title: 'Resmi Garanti', desc: 'BSH / Profilo Güvencesi' },
-                { icon: Truck, title: 'Ücretsiz Teslimat', desc: 'Gaziantep İçi Özel Sevkiyat' },
+                { icon: Truck, title: 'Ücretsiz Teslimat', desc: 'Hızlı & Planlı Sevkiyat' },
                 { icon: Wrench, title: 'Yetkili Kurulum', desc: 'Ücretsiz Yetkili Servis Montajı' },
                 { icon: RotateCcw, title: 'Mağaza Güvencesi', desc: 'Resmi Yetkili Bayi Güveni' },
               ].map(({ icon: Icon, title, desc }) => (
@@ -224,7 +224,7 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
               {product.stock > 0 ? (
                 <span className="text-emerald-700 font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                  Akkent & Şehreküstü Stoklarında Mevcut ({product.stock} adet)
+                  Stoklarda Mevcut ({product.stock} adet)
                 </span>
               ) : (
                 <span className="text-red-600 font-bold">Tükendi</span>
@@ -278,17 +278,13 @@ export function ProductDetailClient({ product, related }: ProductDetailClientPro
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <a
-                  href={`https://wa.me/905370103427?text=${encodeURIComponent(
-                    `Merhaba Profilo Yetkili Bayi, aşağıdaki ürünü sipariş vermek istiyorum:\n\n• Ürün: ${product.name}\n• Model Kodu: ${modelCode}\n• Adet: ${quantity}\n• Toplam Tutar: ${formatPrice(effectivePrice * quantity)}\n\nTeslimat ve ödeme işlemleri için bilgi alabilir miyim?`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-3.5 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2 transition-colors shadow-xs"
+                <Link
+                  href="/iletisim"
+                  className="py-3.5 px-4 rounded-xl text-xs font-bold text-white bg-[#005596] hover:bg-[#00447c] flex items-center justify-center gap-2 transition-colors shadow-xs"
                 >
                   <MessageCircle size={16} />
-                  <span>WhatsApp ile Hemen Satın Al</span>
-                </a>
+                  <span>Bilgi &amp; Teklif Al</span>
+                </Link>
                 <Link
                   href="/sepet"
                   className="py-3.5 px-4 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center transition-colors"

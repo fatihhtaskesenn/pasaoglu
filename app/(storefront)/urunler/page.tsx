@@ -369,7 +369,7 @@ function UrunlerContent() {
                 Ürün Kataloğu
               </h1>
               <p className="text-xs sm:text-sm text-blue-100/85 leading-relaxed">
-                Gaziantep Akkent ve Şehreküstü mağazalarımızda resmi BSH / Profilo garantisiyle
+                Profilo Yetkili Satış Mağazamızda resmi BSH / Profilo garantisiyle
                 sunulan güncel beyaz eşya, ankastre, iklimlendirme, televizyon ve küçük ev aletleri.
               </p>
             </div>
@@ -381,7 +381,7 @@ function UrunlerContent() {
               </div>
               <div className="flex items-center gap-2">
                 <Truck size={16} className="text-sky-300" />
-                <span>Gaziantep İçi Ücretsiz Teslimat</span>
+                <span>Ücretsiz Teslimat</span>
               </div>
               <div className="flex items-center gap-2">
                 <Wrench size={16} className="text-sky-300" />

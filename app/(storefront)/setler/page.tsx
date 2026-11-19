@@ -124,7 +124,7 @@ export default function SetlerPage() {
               </h1>
               <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
                 Birbiriyle tam uyumlu Profilo modellerinden oluşturduğumuz 4’lü, 5’li ve 6’lı
-                avantaj paketleri. Tüm setlerimizde Gaziantep içi ücretsiz teslimat ve yetkili
+                avantaj paketleri. Tüm setlerimizde ücretsiz teslimat ve yetkili
                 servis kurulumu geçerlidir.
               </p>
             </div>
@@ -409,15 +409,11 @@ export default function SetlerPage() {
                         </button>
 
                         <a
-                          href={`https://wa.me/905370103427?text=${encodeURIComponent(
-                            `Merhaba, "${setItem.title}" (${formatPrice(setItem.campaign_price)}) setiniz hakkında bilgi almak istiyorum.`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href="/iletisim"
                           className="px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors"
                         >
-                          <MessageCircle size={16} className="text-emerald-600" />
-                          <span>WhatsApp</span>
+                          <MessageCircle size={16} className="text-[#005596]" />
+                          <span>Bilgi &amp; Teklif Al</span>
                         </a>
                       </div>
                     </div>

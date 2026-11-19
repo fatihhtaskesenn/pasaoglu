@@ -3,10 +3,10 @@ import Link from 'next/link';
 import {
   ArrowRight,
   Award,
-  Building2,
   CheckCircle2,
   Handshake,
   ShieldCheck,
+  Sparkles,
   Truck,
   Users,
   Wrench,
@@ -15,8 +15,8 @@ import {
 const brandMetrics = [
   { value: 'Profilo', label: 'Yetkili Satış Bayisi', detail: 'BSH Ev Aletleri resmi güvencesi' },
   { value: '%100', label: 'Orijinal & Garantili', detail: 'Fabrikasyon kapalı kutu ürünler' },
-  { value: '2 Şube', label: 'Şehreküstü & Akkent', detail: 'Gaziantep merkez showroomlarımız' },
-  { value: 'Aynı Gün', label: 'Hızlı Sevkiyat', detail: 'Gaziantep içi ücretsiz teslimat' },
+  { value: 'Ücretsiz', label: 'Yetkili Servis Montajı', detail: 'Profesyonel kurulum desteği' },
+  { value: 'Hızlı', label: 'Güvenli Sevkiyat', detail: 'Özenli ve planlı teslimat' },
 ];
 
 const corePillars = [
@@ -24,7 +24,7 @@ const corePillars = [
     icon: ShieldCheck,
     title: 'Resmi Profilo & BSH Güvencesi',
     description:
-      'Profilo Dayanıklı Ev Aletleri’nin Gaziantep’teki yetkili satış mağazası olarak tüm ürünlerimiz %100 orijinal, faturalı ve resmi distribütör garantilidir.',
+      'Profilo Dayanıklı Ev Aletleri yetkili satış mağazası olarak tüm ürünlerimiz %100 orijinal, faturalı ve resmi distribütör garantilidir.',
   },
   {
     icon: Wrench,
@@ -43,7 +43,7 @@ const corePillars = [
 const serviceHighlights = [
   'Buzdolabı, derin dondurucu, çamaşır ve kurutma makinelerinde geniş stok',
   'Bulaşık makinesi, ankastre set ve fırınlarda en yeni Profilo serileri',
-  'Gaziantep içi adrese ücretsiz sevkiyat ve katlara teslimat',
+  'Kapalı kutu orijinal sevkiyat ve planlı teslimat',
   'Satış sonrası yetkili servis koordinasyonu ve birebir müşteri desteği',
 ];
 
@@ -63,16 +63,15 @@ export default function HakkimizdaPage() {
             <div className="lg:col-span-8 space-y-5">
               <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs sm:text-sm font-semibold tracking-wider uppercase text-sky-200">
                 <Award size={15} className="text-sky-300" />
-                <span>Profilo Yetkili Satış Mağazası • Gaziantep</span>
+                <span>Profilo Yetkili Satış Mağazası</span>
               </div>
               <h1 className="font-display text-3xl sm:text-5xl lg:text-[52px] font-bold tracking-tight leading-[1.12]">
                 Profilo Teknolojisi ile{' '}
                 <span className="text-sky-300">Güvenilir Yaşam Alanları</span>
               </h1>
               <p className="text-base sm:text-xl text-blue-100 leading-relaxed max-w-3xl">
-                Gaziantep’teki Akkent ve Şehreküstü şubelerimizde; dayanıklılığı, enerji
-                tasarrufu ve modern tasarımıyla öne çıkan Profilo beyaz eşya ve elektronik
-                ürünlerini yetkili bayi güvencesiyle sunuyoruz.
+                Dayanıklılığı, enerji tasarrufu ve modern tasarımıyla öne çıkan Profilo beyaz eşya
+                ve elektronik ürünlerini resmi yetkili bayi güvencesiyle sunuyoruz.
               </p>
             </div>
 
@@ -91,7 +90,7 @@ export default function HakkimizdaPage() {
                   Resmi Profilo Yetkili Bayi
                 </p>
                 <p className="text-xs text-blue-100/85 leading-relaxed">
-                  BSH Ev Aletleri Sanayi ve Ticaret A.Ş. Resmi Satış Noktası • Gaziantep
+                  BSH Ev Aletleri Sanayi ve Ticaret A.Ş. Resmi Satış Noktası
                 </p>
               </div>
             </div>
@@ -124,7 +123,7 @@ export default function HakkimizdaPage() {
                 Profilo Deneyimi
               </span>
               <span className="text-sm font-bold uppercase tracking-wider text-[#005596]">
-                Gaziantep Showroomları
+                Yetkili Satış &amp; Danışmanlık
               </span>
             </div>
 
@@ -141,7 +140,7 @@ export default function HakkimizdaPage() {
               <p>
                 Buzdolabından çamaşır ve kurutma makinelerine, bulaşık makinelerinden ankastre
                 setlere, televizyondan iklimlendirme ve küçük ev aletlerine kadar tüm Profilo
-                ürün gruplarını showroomlarımızda yakından inceleyebilirsiniz.
+                ürün gruplarını güvenle inceleyebilirsiniz.
               </p>
             </div>
 
@@ -160,7 +159,7 @@ export default function HakkimizdaPage() {
               <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-slate-100">
                 <Image
                   src="/resim/imageee.png"
-                  alt="Profilo Yetkili Satış Mağazası Showroom"
+                  alt="Profilo Yetkili Satış Mağazası"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"
@@ -168,7 +167,7 @@ export default function HakkimizdaPage() {
               </div>
               <figcaption className="px-1 flex items-center justify-between text-xs sm:text-sm text-slate-700 font-semibold">
                 <span>Profilo Yetkili Satış Mağazası • Ürün Teşhir ve Danışma</span>
-                <span className="text-[#005596] font-mono text-xs">Gaziantep</span>
+                <span className="text-[#005596] font-mono text-xs">Profilo</span>
               </figcaption>
             </figure>
           </div>
@@ -199,32 +198,32 @@ export default function HakkimizdaPage() {
           })}
         </div>
 
-        {/* Şube ve Hizmet Kartları */}
+        {/* Hizmet Avantajları Kartları */}
         <div className="bg-white rounded-2xl p-8 sm:p-10 border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-2">
             <span className="text-xs font-extrabold uppercase tracking-widest text-[#005596] inline-flex items-center gap-1.5">
-              <Building2 size={14} />
-              Akkent Showroom
+              <Sparkles size={14} />
+              Toplu Çeyiz &amp; Ev Paketleri
             </span>
             <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900">
-              Modern Beyaz Eşya & Çeyiz Teşhir Merkezi
+              Özel Avantajlı Profilo Setleri
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
-              Şahinbey / Akkent bölgesinde geniş showroom alanı, tüm çeyiz setleri ve birebir uzman
-              satış danışmanlığı.
+              İhtiyacınıza uygun kombinasyonlarla hazırlanmış çeyiz ve ev yenileme setlerinde
+              özel paket fiyatları ve uzman satış danışmanlığı.
             </p>
           </div>
 
           <div className="md:border-l border-t md:border-t-0 border-slate-200 pt-6 md:pt-0 md:pl-8 space-y-2">
             <span className="text-xs font-extrabold uppercase tracking-widest text-[#005596] inline-flex items-center gap-1.5">
               <Truck size={14} />
-              Şehreküstü Merkez Şube
+              Hızlı &amp; Planlı Teslimat
             </span>
             <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900">
-              Merkez Satış & Hızlı Sevkiyat Noktası
+              Yetkili Servis Koordinasyonu
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
-              Gaziantep merkezde kolay ulaşım, hızlı stok teslimatı ve doğrudan müşteri desteği.
+              Siparişten kuruluma kadar her aşamada şeffaf bilgilendirme ve resmi garanti tescili.
             </p>
           </div>
         </div>
@@ -236,18 +235,18 @@ export default function HakkimizdaPage() {
           <div className="space-y-1.5 text-center sm:text-left">
             <h3 className="font-display text-xl font-bold text-white flex items-center justify-center sm:justify-start gap-2">
               <Handshake size={20} className="text-sky-300" />
-              <span>Akkent ve Şehreküstü Mağazalarımıza Bekleriz</span>
+              <span>Profilo Ürünleri Hakkında Bilgi ve Teklif Alın</span>
             </h3>
             <p className="text-sm sm:text-base text-blue-100">
-              Şube adreslerimiz, mağaza konumlarımız ve doğrudan iletişim numaralarımız için
-              iletişim sayfamızı ziyaret edebilirsiniz.
+              Ürün danışmanlığı, stok durumu ve toplu set teklifleri için iletişim formumuzu
+              kullanabilirsiniz.
             </p>
           </div>
           <Link
             href="/iletisim"
             className="px-6 py-3.5 rounded-xl bg-white hover:bg-blue-50 text-[#005596] font-bold text-sm transition-colors flex items-center gap-2 whitespace-nowrap shadow-xs"
           >
-            <span>İletişim & Şubelerimiz</span>
+            <span>İletişim &amp; Teklif Al</span>
             <ArrowRight size={16} />
           </Link>
         </div>

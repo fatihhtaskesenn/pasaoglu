@@ -2015,7 +2015,7 @@ export default function AdminCatalogPage() {
                 type="text"
                 value={slideTitle}
                 onChange={(e) => setSlideTitle(e.target.value)}
-                placeholder="Örn: Akkent Showroom Dış Cephe"
+                placeholder="Örn: Profilo Yetkili Bayi Vitrin"
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#005596]"
               />
             </div>

@@ -19,26 +19,6 @@ export function CartDrawer() {
   const { items, isOpen, closeCart, updateQuantity, removeItem, totalPrice, totalItems } =
     useCartStore();
 
-  const buildWhatsAppCartUrl = () => {
-    const lines = [
-      'Merhaba Profilo Yetkili Bayi, aşağıdaki ürünleri sipariş vermek istiyorum:',
-      '',
-      ...items.map(({ product, quantity }, idx) => {
-        const unit = product.discountedPrice ?? product.price;
-        const modelFeature = product.features.find((f) => f.startsWith('Model Kodu:'));
-        const modelCode = modelFeature
-          ? modelFeature.replace('Model Kodu:', '').trim()
-          : product.id.toUpperCase();
-        return `${idx + 1}. ${product.name} (${modelCode})\n   Adet: ${quantity} x ${formatPrice(unit)} = ${formatPrice(unit * quantity)}`;
-      }),
-      '',
-      `Toplam Sipariş Tutarı: ${formatPrice(totalPrice())}`,
-      'Teslimat ve ödeme detayları için yardımcı olabilir misiniz?',
-    ];
-
-    return `https://wa.me/905370103427?text=${encodeURIComponent(lines.join('\n'))}`;
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -195,20 +175,10 @@ export function CartDrawer() {
                 </div>
 
                 <div className="flex flex-col gap-2.5">
-                  <a
-                    href={buildWhatsAppCartUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3 rounded-xl font-bold text-xs tracking-wide bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 shadow-sm transition-colors"
-                  >
-                    <MessageCircle size={16} />
-                    <span>WhatsApp ile Satın Al (Otomatik Mesaj)</span>
-                  </a>
-
                   <Link
                     href="/sepet"
                     onClick={closeCart}
-                    className="w-full py-3 rounded-xl font-bold text-xs tracking-wide bg-[#005596] hover:bg-[#00447c] text-white flex items-center justify-center gap-2 transition-colors"
+                    className="w-full py-3 rounded-xl font-bold text-xs tracking-wide bg-[#005596] hover:bg-[#00447c] text-white flex items-center justify-center gap-2 shadow-sm transition-colors"
                   >
                     <span>Sepete ve Ödeme Sayfasına Git</span>
                     <ArrowRight size={14} />
